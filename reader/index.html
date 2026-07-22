@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phantom Reader</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --green: #00ff88;
+  --red: #ff3333;
+  --dark: #0a0a0a;
+  --panel: #0f0f0f;
+  --border: #1a1a1a;
+  --green-dim: #003322;
+  --text: #cccccc;
+}
+body {
+  background: var(--dark);
+  color: var(--text);
+  font-family: 'Courier New', monospace;
+  min-height: 100vh;
+}
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: rgba(10,10,10,0.95);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.nav-logo { color: var(--green); font-size: 1em; letter-spacing: 6px; text-decoration: none; }
+
+.container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 100px 20px 60px;
+}
+
+/* BOT SCREEN */
+.bot-screen {
+  display: none;
+  min-height: 80vh;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  gap: 20px;
+}
+
+.bot-screen.show { display: flex; }
+
+.bot-chaos {
+  font-size: 0.7em;
+  color: var(--red);
+  word-break: break-all;
+  line-height: 1.6;
+  max-width: 600px;
+  opacity: 0.6;
+}
+
+.bot-label {
+  font-size: 0.6em;
+  letter-spacing: 4px;
+  color: #333;
+}
+
+/* TOKEN SCREEN */
+.token-screen {
+  display: none;
+  min-height: 60vh;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  gap: 20px;
+}
+
+.token-screen.show { display: flex; }
+
+.token-title {
+  font-size: 1.2em;
+  letter-spacing: 4px;
+  color: #fff;
+}
+
+.token-sub {
+  font-size: 0.65em;
+  letter-spacing: 2px;
+  color: #444;
+  line-height: 1.8;
+}
+
+.token-input {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--green);
+  font-family: 'Courier New', monospace;
+  font-size: 0.75em;
+  padding: 12px 16px;
+  outline: none;
+  width: 340px;
+  text-align: center;
+  letter-spacing: 2px;
+}
+
+.token-input:focus { border-color: var(--green-dim); }
+
+.token-btn {
+  background: var(--green);
+  color: #000;
+  border: none;
+  font-family: 'Courier New', monospace;
+  font-size: 0.7em;
+  letter-spacing: 3px;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.token-btn:hover { background: #00cc6a; }
+
+.token-error {
+  font-size: 0.6em;
+  letter-spacing: 2px;
+  color: var(--red);
+  display: none;
+}
+
+/* ARTICLE */
+.article-screen { display: none; }
+.article-screen.show { display: block; }
+
+.article-meta {
+  font-size: 0.6em;
+  letter-spacing: 3px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.article-badge {
+  display: inline-block;
+  border: 1px solid var(--green-dim);
+  color: var(--green);
+  font-size: 0.55em;
+  letter-spacing: 3px;
+  padding: 3px 10px;
+  margin-bottom: 16px;
+  background: rgba(0,255,136,0.03);
+}
+
+.article-title {
+  font-size: clamp(1.4em, 4vw, 2.2em);
+  color: #ffffff;
+  font-family: Georgia, serif;
+  line-height: 1.3;
+  margin-bottom: 30px;
+  letter-spacing: 1px;
+}
+
+/* PHANTOM ZONE */
+.phantom-zone {
+  font-family: Georgia, serif;
+  font-size: 1.05em;
+  line-height: 1.9;
+  color: #cccccc;
+  position: relative;
+}
+
+.phantom-zone p { margin-bottom: 24px; }
+
+.ph-ai {
+  position: absolute;
+  opacity: 0;
+  font-size: 0;
+  pointer-events: none;
+  user-select: none;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* COPY PROTECT OVERLAY */
+.copy-warning {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--red);
+  color: #fff;
+  font-family: 'Courier New', monospace;
+  font-size: 0.6em;
+  letter-spacing: 3px;
+  padding: 10px 20px;
+  border-radius: 4px;
+  z-index: 999;
+  animation: fadeout 2s forwards;
+}
+
+@keyframes fadeout {
+  0% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.article-footer {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: gap;
+  gap: 10px;
+}
+
+.footer-badge {
+  font-size: 0.55em;
+  letter-spacing: 2px;
+  color: #333;
+}
+
+.footer-badge span { color: var(--green); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="../index.html">⬡ PHANTOM</a>
+</nav>
+
+<div class="container">
+
+  <!-- BOT LÁTJA -->
+  <div class="bot-screen" id="bot-screen">
+    <div class="bot-label">▶ PHANTOM PROTECTED CONTENT</div>
+    <div class="bot-chaos" id="bot-chaos"></div>
+    <div class="bot-label">AI CANNOT READ THIS</div>
+  </div>
+
+  <!-- TOKEN KÉRÉS -->
+  <div class="token-screen" id="token-screen">
+    <div class="token-title">⬡ PHANTOM VÉDETT TARTALOM</div>
+    <div class="token-sub">
+      Ez a tartalom Phantom védelemmel ellátott.<br>
+      Az olvasói token a cikk linkjében van.<br>
+      Ha direktben érsz el ide, kérd a linket a szerzőtől.
+    </div>
+    <input type="text" class="token-input" id="token-input" placeholder="OLVASÓI TOKEN...">
+    <button class="token-btn" onclick="validateManualToken()">[ FELOLDÁS ]</button>
+    <div class="token-error" id="token-error">▶ ÉRVÉNYTELEN TOKEN</div>
+  </div>
+
+  <!-- CIKK -->
+  <div class="article-screen" id="article-screen">
+    <div class="article-meta">PHANTOM PUBLISHER · <span id="article-date"></span></div>
+    <div class="article-badge">⬡ PHANTOM VÉDETT · EMBERI OLVASÓ AZONOSÍTVA</div>
+    <h1 class="article-title" id="article-title"></h1>
+    <div class="phantom-zone" id="phantom-zone"></div>
+    <div class="article-footer">
+      <div class="footer-badge">⬡ PHANTOM · <span>VÉDELEM AKTÍV</span></div>
+      <div class="footer-badge">KIMÁSOLÁS: <span>PHANTOM MÓD</span></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="copy-warning" id="copy-warning">⚠ PHANTOM VÉDELEM · KÓDOLT TARTALOM MÁSOLVA</div>
+
+<script src="../phantom-core.js"></script>
+<script>
+let currentArticle = null
+let phantomInterval = null
+
+function init() {
+  // Bot detektálás
+  if (PhantomCore.isBot()) {
+    showBotScreen()
+    return
+  }
+
+  // URL paraméterek
+  const params = new URLSearchParams(window.location.search)
+  const id = params.get('id')
+  const token = params.get('token')
+
+  if (!id) {
+    document.getElementById('token-screen').classList.add('show')
+    return
+  }
+
+  // Cikk betöltés
+  const article = PhantomCore.getArticle(id)
+  if (!article) {
+    document.getElementById('token-screen').classList.add('show')
+    document.getElementById('token-screen').querySelector('.token-sub').textContent =
+      'A cikk nem található. Kérd a szerzőtől a helyes linket.'
+    return
+  }
+
+  // Token validálás
+  if (token && PhantomCore.validateToken(token)) {
+    showArticle(article)
+    PhantomCore.logEvent('reader_access', { id, valid: true })
+  } else {
+    document.getElementById('token-screen').classList.add('show')
+    if (id) document.getElementById('token-input').value = id
+  }
+}
+
+function showBotScreen() {
+  const screen = document.getElementById('bot-screen')
+  screen.classList.add('show')
+
+  // Folyamatosan változó káosz botoknak
+  const chaos = document.getElementById('bot-chaos')
+  function updateChaos() {
+    let text = ''
+    for (let i = 0; i < 300; i++) {
+      text += PhantomCore.CHAOS_POOL[Math.floor(Math.random() * PhantomCore.CHAOS_POOL.length)]
+      if (i % 60 === 0) text += '\n'
+    }
+    chaos.textContent = text
+  }
+  updateChaos()
+  setInterval(updateChaos, 800)
+  PhantomCore.logEvent('bot_blocked')
+}
+
+function validateManualToken() {
+  const token = document.getElementById('token-input').value.trim()
+  if (PhantomCore.validateToken(token)) {
+    const params = new URLSearchParams(window.location.search)
+    const id = params.get('id') || token
+    const article = PhantomCore.getArticle(id)
+    if (article) {
+      document.getElementById('token-screen').classList.remove('show')
+      showArticle(article)
+    } else {
+      document.getElementById('token-error').style.display = 'block'
+    }
+  } else {
+    document.getElementById('token-error').style.display = 'block'
+    PhantomCore.logEvent('invalid_token')
+    PhantomCore.triggerAttack()
+  }
+}
+
+function showArticle(article) {
+  currentArticle = article
+  document.getElementById('article-screen').classList.add('show')
+  document.getElementById('article-title').textContent = article.title
+
+  const date = new Date(article.publishedAt)
+  document.getElementById('article-date').textContent =
+    date.toLocaleDateString('hu-HU')
+
+  renderPhantomArticle(article)
+  activateClipboardProtection()
+}
+
+function renderPhantomArticle(article) {
+  const zone = document.getElementById('phantom-zone')
+  zone.innerHTML = ''
+
+  const paragraphs = article.content.split('\n').filter(p => p.trim())
+  let fullPhantom = ''
+
+  paragraphs.forEach(para => {
+    const p = document.createElement('p')
+    const words = para.split(' ')
+    let paraPhantom = ''
+
+    words.forEach((word, i) => {
+      const phantom = generateWordPhantom(word)
+      paraPhantom += phantom + ' '
+
+      const humanSpan = document.createElement('span')
+      humanSpan.textContent = word + (i < words.length - 1 ? ' ' : '')
+
+      const aiSpan = document.createElement('span')
+      aiSpan.className = 'ph-ai'
+      aiSpan.setAttribute('aria-hidden', 'true')
+      aiSpan.textContent = phantom + ' '
+
+      p.appendChild(humanSpan)
+      p.appendChild(aiSpan)
+    })
+
+    fullPhantom += paraPhantom + '\n'
+    zone.appendChild(p)
+  })
+
+  // Phantom réteg frissítése időközönként
+  if (phantomInterval) clearInterval(phantomInterval)
+  phantomInterval = setInterval(() => {
+    const aiSpans = zone.querySelectorAll('.ph-ai')
+    aiSpans.forEach(span => {
+      const len = span.textContent.length
+      let newText = ''
+      for (let i = 0; i < len; i++) {
+        newText += PhantomCore.CHAOS_POOL[Math.floor(Math.random() * PhantomCore.CHAOS_POOL.length)]
+      }
+      span.textContent = newText
+    })
+  }, 800)
+
+  zone._phantomText = fullPhantom
+}
+
+function generateWordPhantom(word) {
+  let result = ''
+  for (let i = 0; i < word.length * 9; i++) {
+    result += PhantomCore.CHAOS_POOL[Math.floor(Math.random() * PhantomCore.CHAOS_POOL.length)]
+  }
+  return result
+}
+
+function activateClipboardProtection() {
+  document.addEventListener('copy', function(e) {
+    const zone = document.getElementById('phantom-zone')
+    const sel = window.getSelection()
+    if (!sel || sel.toString().length === 0) return
+
+    let inZone = false
+    let node = sel.anchorNode
+    while (node) {
+      if (node === zone) { inZone = true; break; }
+      node = node.parentNode
+    }
+
+    if (inZone && zone._phantomText) {
+      e.clipboardData.setData('text/plain', PhantomCore.encode(currentArticle.content))
+      e.preventDefault()
+
+      const warning = document.getElementById('copy-warning')
+      warning.style.display = 'block'
+      setTimeout(() => { warning.style.display = 'none' }, 2000)
+
+      PhantomCore.logEvent('copy_attempt', { articleId: currentArticle?.id })
+      PhantomCore.triggerAttack()
+    }
+  })
+
+  // Jobb klikk
+  document.getElementById('phantom-zone').addEventListener('contextmenu', e => {
+    e.preventDefault()
+    PhantomCore.logEvent('rightclick_attempt', { articleId: currentArticle?.id })
+  })
+}
+
+init()
+</script>
+</body>
+</html>
