@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phantom Publisher</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --green: #00ff88;
+  --red: #ff3333;
+  --dark: #0a0a0a;
+  --panel: #0f0f0f;
+  --border: #1a1a1a;
+  --green-dim: #003322;
+  --text: #aaaaaa;
+}
+body {
+  background: var(--dark);
+  color: var(--text);
+  font-family: 'Courier New', monospace;
+  min-height: 100vh;
+}
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: rgba(10,10,10,0.95);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.nav-logo { color: var(--green); font-size: 1em; letter-spacing: 6px; text-decoration: none; }
+.nav-links { display: flex; gap: 24px; list-style: none; }
+.nav-links a { color: #444; text-decoration: none; font-size: 0.6em; letter-spacing: 3px; transition: color 0.2s; }
+.nav-links a:hover, .nav-links a.active { color: var(--green); }
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 100px 20px 40px;
+}
+
+.page-title {
+  font-size: 0.6em;
+  letter-spacing: 4px;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.page-heading {
+  font-size: 1.4em;
+  color: #fff;
+  letter-spacing: 4px;
+  margin-bottom: 30px;
+}
+
+.editor-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+  align-items: start;
+}
+
+/* EDITOR */
+.editor-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.editor-toolbar {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.toolbar-label {
+  font-size: 0.55em;
+  letter-spacing: 3px;
+  color: #333;
+  margin-right: 6px;
+}
+
+.tool-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: #555;
+  font-family: 'Courier New', monospace;
+  font-size: 0.6em;
+  letter-spacing: 2px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tool-btn:hover { border-color: var(--green-dim); color: var(--green); }
+
+.title-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: #ffffff;
+  font-family: Georgia, serif;
+  font-size: 1.6em;
+  padding: 20px 24px;
+  outline: none;
+}
+
+.title-input::placeholder { color: #222; }
+
+.content-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-family: Georgia, serif;
+  font-size: 1em;
+  padding: 24px;
+  outline: none;
+  resize: none;
+  min-height: 400px;
+  line-height: 1.9;
+}
+
+.content-input::placeholder { color: #222; }
+
+.editor-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.word-count {
+  font-size: 0.55em;
+  letter-spacing: 2px;
+  color: #333;
+}
+
+/* SIDEBAR */
+.sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+.sidebar-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.sidebar-title {
+  font-size: 0.6em;
+  letter-spacing: 3px;
+  color: #333;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.publish-btn {
+  width: 100%;
+  background: var(--green);
+  color: #000;
+  border: none;
+  font-family: 'Courier New', monospace;
+  font-size: 0.7em;
+  letter-spacing: 3px;
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 10px;
+}
+
+.publish-btn:hover { background: #00cc6a; }
+
+.save-btn {
+  width: 100%;
+  background: transparent;
+  color: var(--green);
+  border: 1px solid var(--green-dim);
+  font-family: 'Courier New', monospace;
+  font-size: 0.65em;
+  letter-spacing: 3px;
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.save-btn:hover { background: var(--green-dim); }
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.status-key {
+  font-size: 0.55em;
+  letter-spacing: 2px;
+  color: #333;
+}
+
+.status-val {
+  font-size: 0.6em;
+  letter-spacing: 2px;
+}
+
+.status-active { color: var(--green); }
+.status-inactive { color: #333; }
+
+.toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.toggle-label {
+  font-size: 0.55em;
+  letter-spacing: 2px;
+  color: #555;
+}
+
+.toggle {
+  width: 36px;
+  height: 20px;
+  background: var(--green-dim);
+  border-radius: 10px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.toggle.on { background: var(--green); }
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: #000;
+  border-radius: 50%;
+  top: 3px;
+  left: 3px;
+  transition: left 0.2s;
+}
+
+.toggle.on::after { left: 19px; }
+
+/* ARTICLES LIST */
+.articles-list { display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto; }
+
+.article-item {
+  padding: 10px 12px;
+  background: #080808;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.article-item:hover { border-color: var(--green-dim); }
+
+.article-item-title {
+  font-size: 0.65em;
+  letter-spacing: 1px;
+  color: #888;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.article-item-meta {
+  font-size: 0.55em;
+  letter-spacing: 1px;
+  color: #333;
+}
+
+/* PUBLISHED RESULT */
+.result-panel {
+  display: none;
+  background: var(--panel);
+  border: 1px solid var(--green-dim);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.result-panel.show { display: block; }
+
+.result-title {
+  font-size: 0.6em;
+  letter-spacing: 3px;
+  color: var(--green);
+  margin-bottom: 16px;
+}
+
+.result-link {
+  background: #080808;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-size: 0.6em;
+  letter-spacing: 1px;
+  color: var(--green);
+  word-break: break-all;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+
+.copy-link-btn {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--green-dim);
+  color: var(--green);
+  font-family: 'Courier New', monospace;
+  font-size: 0.6em;
+  letter-spacing: 3px;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.copy-link-btn:hover { background: var(--green-dim); }
+
+/* NOTIFICATION */
+.notif {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: var(--green);
+  color: #000;
+  font-family: 'Courier New', monospace;
+  font-size: 0.65em;
+  letter-spacing: 3px;
+  padding: 12px 20px;
+  border-radius: 4px;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.3s;
+  z-index: 999;
+}
+
+.notif.show { transform: translateY(0); opacity: 1; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="../index.html">⬡ PHANTOM</a>
+  <ul class="nav-links">
+    <li><a href="index.html" class="active">PUBLISHER</a></li>
+    <li><a href="../reader/index.html">READER</a></li>
+    <li><a href="../dashboard/index.html">DASHBOARD</a></li>
+  </ul>
+</nav>
+
+<div class="container">
+  <div class="page-title">▶ PHANTOM PUBLISHER</div>
+  <div class="page-heading">ÍRJ. VÉDETTEM.</div>
+
+  <div class="editor-layout">
+    <!-- EDITOR -->
+    <div class="editor-panel">
+      <div class="editor-toolbar">
+        <span class="toolbar-label">SZERKESZTŐ:</span>
+        <button class="tool-btn" onclick="newArticle()">[ ÚJ ]</button>
+        <button class="tool-btn" onclick="clearEditor()">[ TÖRLÉS ]</button>
+      </div>
+      <input type="text" class="title-input" id="title-input" placeholder="A cikk címe...">
+      <textarea class="content-input" id="content-input" placeholder="Kezdj el írni... A Phantom automatikusan védi a szövegedet publikáláskor."></textarea>
+      <div class="editor-footer">
+        <span class="word-count" id="word-count">0 szó · 0 karakter</span>
+        <span class="word-count" id="phantom-status">● PHANTOM KÉSZEN ÁLL</span>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+
+      <!-- PUBLISH -->
+      <div class="sidebar-panel">
+        <div class="sidebar-title">▶ PUBLIKÁLÁS</div>
+        <button class="publish-btn" onclick="publishArticle()">[ PHANTOM PUBLIKÁLÁS ]</button>
+        <button class="save-btn" onclick="saveDraft()">[ PISZKOZAT MENTÉSE ]</button>
+      </div>
+
+      <!-- VÉDELEM BEÁLLÍTÁSOK -->
+      <div class="sidebar-panel">
+        <div class="sidebar-title">▶ VÉDELMI SZINT</div>
+
+        <div class="toggle-row">
+          <span class="toggle-label">PHANTOM KÓDOLÁS</span>
+          <div class="toggle on" id="toggle-encode" onclick="toggleOption('encode')"></div>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">CLIPBOARD VÉDELEM</span>
+          <div class="toggle on" id="toggle-clipboard" onclick="toggleOption('clipboard')"></div>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">BOT DETEKTÁLÁS</span>
+          <div class="toggle on" id="toggle-bot" onclick="toggleOption('bot')"></div>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">TÁMADÁSVÉDELEM</span>
+          <div class="toggle on" id="toggle-attack" onclick="toggleOption('attack')"></div>
+        </div>
+
+        <div style="margin-top:16px">
+          <div class="status-row">
+            <span class="status-key">STÁTUSZ</span>
+            <span class="status-val status-active">● AKTÍV</span>
+          </div>
+          <div class="status-row">
+            <span class="status-key">VÉDETT CIKKEK</span>
+            <span class="status-val status-active" id="protected-count">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- EREDMÉNY -->
+      <div class="result-panel" id="result-panel">
+        <div class="result-title">✓ PUBLIKÁLVA · VÉDELEM AKTÍV</div>
+        <div class="result-link" id="result-link" onclick="copyLink()"></div>
+        <button class="copy-link-btn" onclick="copyLink()">[ LINK MÁSOLÁSA ]</button>
+        <div style="margin-top:10px">
+          <button class="copy-link-btn" onclick="openReader()" style="margin-top:6px">[ OLVASÓI NÉZET →]</button>
+        </div>
+      </div>
+
+      <!-- CIKKEK -->
+      <div class="sidebar-panel">
+        <div class="sidebar-title">▶ MENTETT CIKKEK</div>
+        <div class="articles-list" id="articles-list">
+          <div style="font-size:0.55em;color:#333;letter-spacing:2px">Még nincs mentett cikk.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<script src="../phantom-core.js"></script>
+<script>
+let currentArticleId = null
+let options = { encode: true, clipboard: true, bot: true, attack: true }
+let currentPhantomText = ''
+
+// Szószámláló
+const titleInput = document.getElementById('title-input')
+const contentInput = document.getElementById('content-input')
+
+function updateWordCount() {
+  const text = contentInput.value
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0
+  document.getElementById('word-count').textContent = `${words} szó · ${text.length} karakter`
+}
+
+contentInput.addEventListener('input', updateWordCount)
+
+// Toggle
+function toggleOption(key) {
+  options[key] = !options[key]
+  const el = document.getElementById('toggle-' + key)
+  el.classList.toggle('on', options[key])
+}
+
+// Publish
+function publishArticle() {
+  const title = titleInput.value.trim()
+  const content = contentInput.value.trim()
+
+  if (!title || !content) {
+    showNotif('▶ CÍM ÉS TARTALOM SZÜKSÉGES')
+    return
+  }
+
+  const id = currentArticleId || PhantomCore.generateId()
+  currentArticleId = id
+
+  const token = PhantomCore.generateToken(id)
+  currentPhantomText = PhantomCore.encode(content)
+
+  const article = {
+    id,
+    title,
+    content,
+    phantomContent: currentPhantomText,
+    token,
+    options: { ...options },
+    publishedAt: Date.now(),
+    views: 0,
+    attacks: 0
+  }
+
+  PhantomCore.saveArticle(article)
+  PhantomCore.logEvent('publish', { id, title })
+
+  // Result megjelenítés
+  const readerUrl = `${window.location.origin}/reader/index.html?id=${id}&token=${token}`
+  document.getElementById('result-link').textContent = readerUrl
+  document.getElementById('result-panel').classList.add('show')
+
+  updateArticlesList()
+  updateProtectedCount()
+  showNotif('✓ CIKK PUBLIKÁLVA · PHANTOM AKTÍV')
+
+  // Clipboard védelem
+  if (options.clipboard) activateClipboardProtection()
+}
+
+// Piszkozat mentés
+function saveDraft() {
+  const title = titleInput.value.trim() || 'Névtelen piszkozat'
+  const content = contentInput.value.trim()
+  if (!content) { showNotif('▶ TARTALOM SZÜKSÉGES'); return }
+
+  const id = currentArticleId || PhantomCore.generateId()
+  currentArticleId = id
+
+  PhantomCore.saveArticle({
+    id,
+    title,
+    content,
+    phantomContent: PhantomCore.encode(content),
+    token: PhantomCore.generateToken(id),
+    options: { ...options },
+    publishedAt: Date.now(),
+    isDraft: true,
+    views: 0,
+    attacks: 0
+  })
+
+  updateArticlesList()
+  updateProtectedCount()
+  showNotif('✓ PISZKOZAT MENTVE')
+}
+
+// Clipboard védelem
+function activateClipboardProtection() {
+  document.addEventListener('copy', function handleCopy(e) {
+    const sel = window.getSelection()
+    if (!sel || sel.toString().length === 0) return
+    if (currentPhantomText) {
+      e.clipboardData.setData('text/plain', currentPhantomText)
+      e.preventDefault()
+      PhantomCore.logEvent('clipboard_attempt', { articleId: currentArticleId })
+      if (options.attack) PhantomCore.triggerAttack()
+    }
+  })
+}
+
+// Cikk lista frissítés
+function updateArticlesList() {
+  const articles = PhantomCore.getArticles()
+  const list = document.getElementById('articles-list')
+  const items = Object.values(articles).reverse()
+
+  if (items.length === 0) {
+    list.innerHTML = '<div style="font-size:0.55em;color:#333;letter-spacing:2px">Még nincs mentett cikk.</div>'
+    return
+  }
+
+  list.innerHTML = items.map(a => `
+    <div class="article-item" onclick="loadArticle('${a.id}')">
+      <div class="article-item-title">${a.title}</div>
+      <div class="article-item-meta">${PhantomCore.timeAgo(a.publishedAt)} · ${a.isDraft ? 'PISZKOZAT' : 'PUBLIKÁLT'}</div>
+    </div>
+  `).join('')
+}
+
+// Cikk betöltés
+function loadArticle(id) {
+  const article = PhantomCore.getArticle(id)
+  if (!article) return
+  currentArticleId = id
+  titleInput.value = article.title
+  contentInput.value = article.content
+  currentPhantomText = article.phantomContent
+  updateWordCount()
+
+  const readerUrl = `${window.location.origin}/reader/index.html?id=${id}&token=${article.token}`
+  document.getElementById('result-link').textContent = readerUrl
+  document.getElementById('result-panel').classList.add('show')
+  showNotif('▶ CIKK BETÖLTVE')
+}
+
+function newArticle() {
+  currentArticleId = null
+  titleInput.value = ''
+  contentInput.value = ''
+  currentPhantomText = ''
+  document.getElementById('result-panel').classList.remove('show')
+  updateWordCount()
+}
+
+function clearEditor() { newArticle() }
+
+function updateProtectedCount() {
+  const count = Object.keys(PhantomCore.getArticles()).length
+  document.getElementById('protected-count').textContent = count
+}
+
+function copyLink() {
+  const link = document.getElementById('result-link').textContent
+  navigator.clipboard.writeText(link)
+  showNotif('✓ LINK MÁSOLVA')
+}
+
+function openReader() {
+  const link = document.getElementById('result-link').textContent
+  window.open(link, '_blank')
+}
+
+function showNotif(msg) {
+  const el = document.getElementById('notif')
+  el.textContent = msg
+  el.classList.add('show')
+  setTimeout(() => el.classList.remove('show'), 2500)
+}
+
+// Init
+updateArticlesList()
+updateProtectedCount()
+PhantomCore.logEvent('publisher_visit')
+</script>
+</body>
+</html>
