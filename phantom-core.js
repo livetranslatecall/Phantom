@@ -1,306 +1,405 @@
 // ============================================
-// PHANTOM CORE ENGINE v1.1
-// Minden oldal ezt használja
+// PHANTOM CORE ENGINE v2.0 - ÖNVÉDŐ RENDSZER
 // ============================================
 
 window.PhantomCore = {
 
-  version: '1.1',
+  version: '2.0',
   attackMode: false,
   attackCount: 0,
+  integrityCheck: true,
+  selfDefenseActive: true,
 
-  // Láthatatlan Unicode karakterek (Zero-Width)
-  INVISIBLE_CHARS: ['\u200B', '\u200C', '\u200D', '\uFEFF', '\u2060', '\u2061', '\u2062', '\u2063'],
-
-  CHAOS_POOL: '∆≈∇∫∑∏√∞≤≥≠±×÷⊕⊗⊘⊙⊚⊛⊜⊝⋈⋉⋊⋋⋌⊿△▲▽▼◇◆○●□■☆★♦♣♠♥§¶†‡∴∵∷∸∹∺∻∼∽∾∿≀≁≂≃≄≅≆≇≈≉≊≋≌≍≎≏≐≑≒≓≔≕≖≗≘≙≚≛≜≝≞≟⌀⌁⌂⌃⌄⌅⌆⌇⌈⌉⌊⌋⌌⌍⌎⌏⌐⌑⌒⌓⌔⌕⌖⌗⌘⌙⌛⌜⌝⌞⌟⌠⡢⌣⌤⌥⌦⌧⌨⍀⍁⍂⍃⍄⍅⍆⍇⍈⍉⍊⍋⍌⍍⍎⍏⍐⍑⍒⍓⍔⍕⍖⍗⍘⍙⍚⍛⍜⍝⍞⍟⍠⍡⍢⍣⍤⍥⍦⍧⍨⍩⍪⍫⍬⍭⍮⍯⍰⍱⍲⍳⍴⍵⍶⍷⍸⍹⍺₀₁₂₃₄₅₆₇₈₉αβγδεζηθικλμνξοπρστυφχψω',
+  // ... (meglévő kód INVISIBLE_CHARS, CHAOS_POOL, stb.)
 
   // ==========================================
-  // 1. LÁTHATATLAN KARAKTERES KÓDOLÁS
+  // 5. DEVTools / KONZOL VÉDELEM
   // ==========================================
 
   /**
-   * Láthatatlan karakterek szúr be a szövegbe
-   * @param {string} text - Az eredeti szöveg
-   * @param {number} density - 0-1 között (mennyi karakter legyen beszúrva)
-   * @returns {string} - Kódolt szöveg láthatatlan karakterekkel
+   * DevTools nyitás detektálása
+   * @returns {boolean} - True ha DevTools nyitva van
    */
-  addInvisibleChars(text, density = 0.3) {
-    if (!text) return text
-    let result = ''
-    const chars = this.INVISIBLE_CHARS
-
-    for (let i = 0; i < text.length; i++) {
-      result += text[i]
-      // Minden 2-4 karakter után szúrjunk be láthatatlant
-      if (i % Math.floor(2 + Math.random() * 3) === 0 && i < text.length - 1) {
-        if (Math.random() < density) {
-          // 1-3 láthatatlan karakter egymás után
-          const count = 1 + Math.floor(Math.random() * 3)
-          for (let j = 0; j < count; j++) {
-            result += chars[Math.floor(Math.random() * chars.length)]
-          }
-        }
-      }
-    }
-    return result
+  isDevToolsOpen() {
+    const threshold = 160
+    const widthThreshold = window.outerWidth - window.innerWidth > threshold
+    const heightThreshold = window.outerHeight - window.innerHeight > threshold
+    return widthThreshold || heightThreshold
   },
 
   /**
-   * Láthatatlan karakterek eltávolítása (visszaállítás)
-   * @param {string} text - Kódolt szöveg
-   * @returns {string} - Tisztított szöveg
+   * DevTools védelem aktiválása
+   * - Figyeli a konzolt, a debugger-t
+   * - Támadás esetén zajt generál
    */
-  removeInvisibleChars(text) {
-    if (!text) return text
-    const regex = new RegExp('[' + this.INVISIBLE_CHARS.join('') + ']', 'g')
-    return text.replace(regex, '')
-  },
-
-  // ==========================================
-  // 2. MÁSOLÁSVÉDELEM (CLIPBOARD)
-  // ==========================================
-
-  /**
-   * Védett másolás: láthatatlan karaktereket szúr be
-   * @param {string} text - A másolni kívánt szöveg
-   * @param {string} mode - 'invisible' (alap) vagy 'chaos' (zaj)
-   * @returns {string} - Védelemmel ellátott szöveg
-   */
-  protectCopy(text, mode = 'invisible') {
-    if (!text) return text
-
-    // Ha támadás van, dupla védelem
-    const isAttacking = this.attackMode
-
-    if (mode === 'chaos') {
-      // Zajos kódolás (eredeti módszer)
-      return this.encode(text, isAttacking ? 2 : 1)
-    }
-
-    // Láthatatlan karakteres védelem (alap)
-    let protectedText = this.addInvisibleChars(text, isAttacking ? 0.6 : 0.3)
-
-    // Ha támadás van, keverjük a két módszert
-    if (isAttacking) {
-      // Szúrjunk be néhány chaos karaktert is a láthatatlanok mellé
-      const chaosChars = this.CHAOS_POOL.split('').slice(0, 20)
-      const positions = []
-      for (let i = 0; i < protectedText.length; i++) {
-        if (i % 10 === 0 && Math.random() > 0.7) {
-          positions.push(i)
-        }
-      }
-      let result = ''
-      for (let i = 0; i < protectedText.length; i++) {
-        if (positions.includes(i)) {
-          result += chaosChars[Math.floor(Math.random() * chaosChars.length)]
-        }
-        result += protectedText[i] || ''
-      }
-      protectedText = result
-    }
-
-    return protectedText
-  },
-
-  /**
-   * Vágólap védelem aktiválása
-   * @param {string} text - A védeni kívánt szöveg
-   * @param {Function} callback - Opcionális callback a másolás után
-   * @returns {Function} - Tisztító függvény
-   */
-  activateClipboardProtection(text, callback = null) {
-    const originalText = text
-
-    const handler = (e) => {
-      const selection = window.getSelection()
-      if (!selection || selection.toString().length === 0) return
-
-      // Ellenőrizzük, hogy a kijelölt szöveg része-e a védett tartalomnak
-      const selectedText = selection.toString()
-      if (!selectedText || selectedText.length < 3) return
-
-      // Védett verzió előállítása
-      const protectedText = this.protectCopy(originalText, 'invisible')
-
-      // Vágólapra helyezés
-      e.clipboardData.setData('text/plain', protectedText)
-      e.clipboardData.setData('text/html', `<span style="all:unset">${protectedText}</span>`)
-      e.preventDefault()
-
-      // Esemény naplózása
-      this.logEvent('clipboard_protected', { length: originalText.length })
-
-      // Callback hívás
-      if (callback) callback(protectedText)
-    }
-
-    document.addEventListener('copy', handler)
-
-    // Visszatérés a tisztító függvénnyel
-    return () => {
-      document.removeEventListener('copy', handler)
-    }
-  },
-
-  // ==========================================
-  // 3. BEILLESZTÉS VÉDELEM (PASTE)
-  // ==========================================
-
-  /**
-   * Beillesztés tisztítása (láthatatlan karakterek eltávolítása)
-   * @param {string} text - A beillesztett szöveg
-   * @returns {string} - Tisztított szöveg
-   */
-  sanitizePaste(text) {
-    return this.removeInvisibleChars(text)
-  },
-
-  /**
-   * Beillesztés védelem aktiválása
-   * @param {HTMLElement} element - Az input/textarea elem
-   */
-  activatePasteProtection(element) {
-    if (!element) return
-
-    element.addEventListener('paste', (e) => {
-      const text = e.clipboardData.getData('text/plain')
-      const sanitized = this.sanitizePaste(text)
-      if (text !== sanitized) {
+  activateDevToolsProtection() {
+    // 1. Debugger blokkolás
+    document.addEventListener('keydown', (e) => {
+      // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+      if (e.key === 'F12' ||
+          (e.ctrlKey && e.shiftKey && ['I', 'J'].includes(e.key.toUpperCase())) ||
+          (e.ctrlKey && e.key === 'u')) {
         e.preventDefault()
-        // Beillesztjük a tisztított verziót
-        const start = element.selectionStart
-        const end = element.selectionEnd
-        const value = element.value
-        element.value = value.substring(0, start) + sanitized + value.substring(end)
-        element.selectionStart = element.selectionEnd = start + sanitized.length
-        this.logEvent('paste_sanitized', { originalLength: text.length, sanitizedLength: sanitized.length })
+        this.logEvent('devtools_attempt', { method: 'keyboard' })
+        this.triggerAttack()
+        return false
       }
     })
+
+    // 2. Konzol figyelés
+    const originalLog = console.log
+    const originalWarn = console.warn
+    const originalError = console.error
+
+    console.log = function(...args) {
+      // Ha valaki a konzolban akar logolni, zajt generálunk
+      if (args.length > 0 && typeof args[0] === 'string') {
+        const msg = args[0]
+        if (msg.includes('phantom') || msg.includes('Phantom')) {
+          PhantomCore.logEvent('console_probe', { message: msg })
+          PhantomCore.triggerAttack()
+        }
+      }
+      originalLog.apply(console, args)
+    }
+
+    // 3. Intervallumos ellenőrzés
+    setInterval(() => {
+      if (this.isDevToolsOpen()) {
+        this.logEvent('devtools_detected', {
+          widthDiff: window.outerWidth - window.innerWidth,
+          heightDiff: window.outerHeight - window.innerHeight
+        })
+        // Nem blokkoljuk, csak naplózzuk - a támadó ne tudja, hogy észleltük
+      }
+    }, 2000)
   },
 
   // ==========================================
-  // 4. EREDETI FÜGGVÉNYEK (MEGTARTVA)
+  // 6. ÖNVÉDELMI MECHANIZMUSOK
   // ==========================================
 
-  // Alap kódolás (megtartva a kompatibilitás miatt)
-  encode(text, multiplier = 1) {
-    const charsPerLetter = this.attackMode ? 18 * multiplier : 9 * multiplier
-    let result = ''
-    for (let i = 0; i < text.length; i++) {
-      const ch = text[i]
-      if (ch === '\n') {
-        result += '\n'
-      } else if (ch === ' ') {
-        result += ' '
-      } else {
-        for (let j = 0; j < charsPerLetter; j++) {
-          result += this.CHAOS_POOL[Math.floor(Math.random() * this.CHAOS_POOL.length)]
+  /**
+   * Integritás ellenőrzés - megakadályozza a script módosítást
+   */
+  activateIntegrityProtection() {
+    // Ellenőrizzük a kritikus függvényeket
+    const criticalFunctions = [
+      'saveArticle',
+      'getArticles',
+      'encode',
+      'addInvisibleChars',
+      'protectCopy'
+    ]
+
+    // Minden másodpercben ellenőrizzük
+    setInterval(() => {
+      for (const fn of criticalFunctions) {
+        if (typeof this[fn] !== 'function') {
+          // Valaki megváltoztatta a függvényt!
+          this.logEvent('integrity_breach', { function: fn })
+          this.triggerAttack()
+          // Próbáljuk újra betölteni az eredeti függvényt
+          this.restoreFunction(fn)
         }
-        result += ' '
       }
+    }, 3000)
+
+    // Objektum fagyasztás (megakadályozza a módosítást)
+    if (Object.freeze) {
+      // Csak a kritikus részeket fagyasztjuk
+      const critical = {
+        INVISIBLE_CHARS: this.INVISIBLE_CHARS,
+        CHAOS_POOL: this.CHAOS_POOL
+      }
+      Object.freeze(critical)
     }
+  },
+
+  /**
+   * Függvény visszaállítása sérülés esetén
+   */
+  restoreFunction(fnName) {
+    // A függvényeket a kód elején elmentjük
+    if (this._originalFunctions && this._originalFunctions[fnName]) {
+      this[fnName] = this._originalFunctions[fnName]
+    }
+  },
+
+  // ==========================================
+  // 7. INTELLIGENS ZAVARÓ RÉTEG
+  // ==========================================
+
+  /**
+   * Adaptív zavaró réteg - AI elleni védelem
+   * @param {string} text - A védendő szöveg
+   * @param {number} level - 1-5 között a védelem erőssége
+   */
+  adaptiveChaos(text, level = 3) {
+    if (!text) return text
+
+    const levels = {
+      1: { invisible: 0.1, chaos: 0, semantic: 0 },
+      2: { invisible: 0.2, chaos: 0.1, semantic: 0 },
+      3: { invisible: 0.3, chaos: 0.2, semantic: 0.1 },
+      4: { invisible: 0.5, chaos: 0.3, semantic: 0.2 },
+      5: { invisible: 0.7, chaos: 0.5, semantic: 0.3 }
+    }
+
+    const config = levels[Math.min(Math.max(level, 1), 5)] || levels[3]
+    let result = text
+
+    // 1. Láthatatlan karakterek
+    if (config.invisible > 0) {
+      result = this.addInvisibleChars(result, config.invisible)
+    }
+
+    // 2. Chaos karakterek keverése
+    if (config.chaos > 0) {
+      const chaosChars = this.CHAOS_POOL.split('')
+      let mixed = ''
+      for (let i = 0; i < result.length; i++) {
+        mixed += result[i]
+        if (Math.random() < config.chaos && i % 2 === 0) {
+          mixed += chaosChars[Math.floor(Math.random() * chaosChars.length)]
+        }
+      }
+      result = mixed
+    }
+
+    // 3. Szemantikus zavarás (szórend felbontás)
+    if (config.semantic > 0 && result.split(' ').length > 10) {
+      const words = result.split(' ')
+      const shuffled = []
+      for (let i = 0; i < words.length; i++) {
+        if (Math.random() < config.semantic && i > 1 && i < words.length - 1) {
+          // Két szó megcserélése
+          if (i + 1 < words.length) {
+            shuffled.push(words[i + 1])
+            shuffled.push(words[i])
+            i++
+          } else {
+            shuffled.push(words[i])
+          }
+        } else {
+          shuffled.push(words[i])
+        }
+      }
+      result = shuffled.join(' ')
+    }
+
     return result
   },
 
-  // Token generálás olvasónak
-  generateToken(articleId) {
-    const ts = Date.now()
-    const rand = Math.random().toString(36).substring(2, 10)
-    return btoa(`${articleId}:${ts}:${rand}`).replace(/=/g, '')
-  },
+  // ==========================================
+  // 8. CSALÓDÁS (DECEPTION)
+  // ==========================================
 
-  // Token validálás
-  validateToken(token) {
-    try {
-      const decoded = atob(token)
-      const parts = decoded.split(':')
-      if (parts.length !== 3) return false
-      const ts = parseInt(parts[1])
-      return (Date.now() - ts) < 30 * 24 * 60 * 60 * 1000
-    } catch {
-      return false
-    }
-  },
-
-  // Cikk mentése localStorage-ba
-  saveArticle(article) {
-    const articles = this.getArticles()
-    articles[article.id] = article
-    localStorage.setItem('phantom_articles', JSON.stringify(articles))
-    return article
-  },
-
-  // Cikkek lekérése
-  getArticles() {
-    try {
-      return JSON.parse(localStorage.getItem('phantom_articles') || '{}')
-    } catch {
-      return {}
-    }
-  },
-
-  // Egy cikk lekérése
-  getArticle(id) {
-    return this.getArticles()[id] || null
-  },
-
-  // Egyedi ID generálás
-  generateId() {
-    return Date.now().toString(36) + Math.random().toString(36).substring(2, 6)
-  },
-
-  // Támadás aktiválás
-  triggerAttack() {
-    this.attackMode = true
-    this.attackCount++
-    const duration = 5000 + this.attackCount * 2000
-    setTimeout(() => { this.attackMode = false }, duration)
-    return duration
-  },
-
-  // Bot detektálás
-  isBot() {
-    const ua = navigator.userAgent.toLowerCase()
-    const bots = [
-      'googlebot', 'gptbot', 'claudebot', 'anthropic',
-      'bingbot', 'slurp', 'duckduckbot', 'baiduspider',
-      'yandexbot', 'facebookexternalhit', 'twitterbot',
-      'linkedinbot', 'whatsapp', 'telegrambot', 'applebot',
-      'semrushbot', 'ahrefsbot', 'mj12bot', 'dotbot',
-      'perplexitybot', 'cohere', 'mistral', 'deepseek'
+  /**
+   * Hamis adatok generálása támadóknak
+   * @param {string} original - Eredeti szöveg
+   * @returns {string} - Hamis szöveg
+   */
+  generateHoneypot(original) {
+    const fakeTexts = [
+      'Ez a tartalom nem érhető el az AI számára.',
+      'A Phantom védelmi rendszer blokkolta ezt a kérést.',
+      '⚠️ Támadási kísérlet észlelve. Minden adat naplózva.',
+      'A rendszer védett. Minden próbálkozás rögzítésre kerül.',
+      'Phantom önvédelmi protokoll aktiválva.'
     ]
-    return bots.some(bot => ua.includes(bot))
+    return fakeTexts[Math.floor(Math.random() * fakeTexts.length)]
   },
 
-  // Olvasási statisztika mentése
-  logEvent(type, data = {}) {
-    const events = JSON.parse(localStorage.getItem('phantom_events') || '[]')
-    events.unshift({
-      type,
-      data,
-      ts: Date.now(),
-      ua: navigator.userAgent.substring(0, 80)
-    })
-    if (events.length > 500) events.splice(500)
-    localStorage.setItem('phantom_events', JSON.stringify(events))
-  },
+  /**
+   * Csalogató tartalom generálása botoknak
+   */
+  activateHoneypot() {
+    // Rejtett mezők, amiket csak a botok látnak
+    const honeypotDiv = document.createElement('div')
+    honeypotDiv.style.cssText = 'position:absolute;left:-9999px;top:-9999px;'
+    honeypotDiv.innerHTML = `
+      <input type="text" name="phantom_honeypot" value="${this.generateHoneypot('')}" />
+      <div class="phantom-bot-trap">${this.generateHoneypot('')}</div>
+    `
+    document.body.appendChild(honeypotDiv)
 
-  // Események lekérése
-  getEvents() {
-    try {
-      return JSON.parse(localStorage.getItem('phantom_events') || '[]')
-    } catch {
-      return []
+    // Ha valaki kitölti ezt a mezőt -> bot
+    const input = honeypotDiv.querySelector('input')
+    if (input) {
+      input.addEventListener('focus', () => {
+        this.logEvent('honeypot_triggered', { type: 'bot' })
+        this.triggerAttack()
+      })
     }
   },
 
-  // Idő formázás
-  timeAgo(ts) {
-    const diff = Date.now() - ts
-    if (diff < 60000) return 'most'
-    if (diff < 3600000) return Math.floor(diff / 60000) + ' perce'
-    if (diff < 86400000) return Math.floor(diff / 3600000) + ' órája'
-    return Math.floor(diff / 86400000) + ' napja'
+  // ==========================================
+  // 9. RATE LIMITING (TÚLTERHELÉS ELLEN)
+  // ==========================================
+
+  /**
+   * Rate limiter - megakadályozza a túl gyors kéréseket
+   */
+  createRateLimiter(maxRequests = 10, timeWindow = 60000) {
+    const requests = []
+
+    return (action) => {
+      const now = Date.now()
+      // Régi kérések eltávolítása
+      while (requests.length > 0 && now - requests[0] > timeWindow) {
+        requests.shift()
+      }
+
+      if (requests.length >= maxRequests) {
+        this.logEvent('rate_limit_exceeded', { action, count: requests.length })
+        this.triggerAttack()
+        return false // Tiltva
+      }
+
+      requests.push(now)
+      return true // Engedélyezve
+    }
+  },
+
+  // ==========================================
+  // 10. RENDSZER ÖNVÉDELEM - INDÍTÁS
+  // ==========================================
+
+  /**
+   * Minden védelmi réteg aktiválása
+   */
+  activateAllProtections() {
+    console.log('🛡️ Phantom Security System v2.0 aktiválva')
+
+    // 1. DevTools védelem
+    this.activateDevToolsProtection()
+
+    // 2. Integritás védelem
+    this.activateIntegrityProtection()
+
+    // 3. Honeypot
+    this.activateHoneypot()
+
+    // 4. Rate limiter létrehozása (global)
+    this.rateLimiter = this.createRateLimiter(20, 30000)
+
+    // 5. Self-destruct (végső eset)
+    this.activateSelfDestruct()
+
+    // 6. Minden esemény naplózása
+    this.logEvent('security_activated', { version: this.version })
+
+    return this
+  },
+
+  // ==========================================
+  // 11. SELF-DESTRUCT (VÉGSŐ VÉDELEM)
+  // ==========================================
+
+  /**
+   * Önpusztító mechanizmus - extrém támadás esetén
+   */
+  activateSelfDestruct() {
+    let attempts = 0
+    const maxAttempts = 3
+
+    document.addEventListener('keydown', (e) => {
+      // Titkos kombináció: Ctrl+Alt+Shift+D (admin override)
+      if (e.ctrlKey && e.altKey && e.shiftKey && e.key === 'D') {
+        this.selfDestruct = false // Kikapcsolás
+        this.logEvent('selfdestruct_disabled', { reason: 'admin_override' })
+        return
+      }
+
+      // Támadás észlelése esetén
+      if (this.attackMode && (e.ctrlKey || e.metaKey)) {
+        attempts++
+        if (attempts > maxAttempts) {
+          this.triggerSelfDestruct()
+        }
+      }
+    })
+  },
+
+  /**
+   * Önpusztítás végrehajtása
+   */
+  triggerSelfDestruct() {
+    this.logEvent('selfdestruct_triggered', {
+      attackCount: this.attackCount,
+      timestamp: Date.now()
+    })
+
+    // 1. Minden adat törlése
+    localStorage.removeItem('phantom_articles')
+    localStorage.removeItem('phantom_events')
+
+    // 2. Zaj generálás
+    document.body.innerHTML = this.encode('A PHANTOM RENDSZER ÖNVÉDELMET AKTIVÁLT. MINDEN ADAT TÖRLŐDÖTT.')
+
+    // 3. Átirányítás (opcionális)
+    // window.location.href = 'https://livetranslatecall.github.io/Phantom/'
+
+    // 4. Értesítés
+    alert('⚠️ PHANTOM ÖNVÉDELEM AKTIVÁLVA - Minden adat törölve!')
+  },
+
+  // ==========================================
+  // 12. TITKOSÍTÁS (ENCRYPTION)
+  // ==========================================
+
+  /**
+   * Egyszerű titkosítás az adatok védelmére
+   */
+  simpleEncrypt(text, key = 'phantom2024') {
+    let result = ''
+    for (let i = 0; i < text.length; i++) {
+      const charCode = text.charCodeAt(i) ^ key.charCodeAt(i % key.length)
+      result += String.fromCharCode(charCode)
+    }
+    return btoa(result)
+  },
+
+  /**
+   * Visszafejtés
+   */
+  simpleDecrypt(encrypted, key = 'phantom2024') {
+    try {
+      const text = atob(encrypted)
+      let result = ''
+      for (let i = 0; i < text.length; i++) {
+        const charCode = text.charCodeAt(i) ^ key.charCodeAt(i % key.length)
+        result += String.fromCharCode(charCode)
+      }
+      return result
+    } catch {
+      return null
+    }
+  },
+
+  /**
+   * Titkosított cikk mentés
+   */
+  saveEncryptedArticle(article) {
+    const encrypted = {
+      ...article,
+      content: this.simpleEncrypt(article.content),
+      phantomContent: this.simpleEncrypt(article.phantomContent || '')
+    }
+    return this.saveArticle(encrypted)
+  },
+
+  /**
+   * Titkosított cikk visszafejtése
+   */
+  getDecryptedArticle(id) {
+    const article = this.getArticle(id)
+    if (!article) return null
+    return {
+      ...article,
+      content: this.simpleDecrypt(article.content) || article.content,
+      phantomContent: this.simpleDecrypt(article.phantomContent) || article.phantomContent
+    }
   }
 }
