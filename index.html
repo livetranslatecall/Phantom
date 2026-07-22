@@ -1,627 +1,2185 @@
 <!DOCTYPE html>
-<html lang="hu">
+<html lang="hu" data-theme="warm-white" data-color="amber">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Phantom – AI Cannot Read You</title>
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'unsafe-inline'; script-src 'self' 'unsafe-inline'" />
+  <title>Phantom Core v3.0 — Security Dashboard</title>
 
-:root {
-  --green: #00ff88;
-  --red: #ff3333;
-  --dark: #0a0a0a;
-  --panel: #0f0f0f;
-  --border: #1a1a1a;
-  --green-dim: #003322;
-  --text: #aaaaaa;
-}
+  <style>
+    /* ═══════════════════════════════════════════
+       1. CSS CUSTOM PROPERTIES — TÉMA RENDSZER
+       ═══════════════════════════════════════════ */
 
-body {
-  background: var(--dark);
-  color: var(--text);
-  font-family: 'Courier New', monospace;
-  overflow-x: hidden;
-}
+    /* Warm White (alap) */
+    [data-theme="warm-white"] {
+      --bg-base:        #f8f5f0;
+      --bg-surface:     #fdfaf6;
+      --bg-elevated:    #ffffff;
+      --bg-sunken:      #f0ece5;
+      --border:         #e2dbd0;
+      --border-strong:  #c8bfb0;
+      --text-primary:   #2c2620;
+      --text-secondary: #6b5f52;
+      --text-muted:     #a09080;
+      --accent-hue:     var(--color-accent, #b07d3a);
+      --accent-soft:    #f5ead8;
+      --accent-glow:    rgba(176,125,58,0.15);
+      --shadow-sm:      0 1px 3px rgba(60,40,20,0.08);
+      --shadow-md:      0 4px 16px rgba(60,40,20,0.10);
+      --shadow-lg:      0 12px 40px rgba(60,40,20,0.13);
+      --overlay:        rgba(44,38,32,0.45);
+    }
 
-/* NAV */
-nav {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 100;
-  background: rgba(10,10,10,0.95);
-  border-bottom: 1px solid var(--border);
-  padding: 16px 40px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+    /* Slate */
+    [data-theme="slate"] {
+      --bg-base:        #f1f3f5;
+      --bg-surface:     #f8f9fa;
+      --bg-elevated:    #ffffff;
+      --bg-sunken:      #e9ecef;
+      --border:         #ced4da;
+      --border-strong:  #adb5bd;
+      --text-primary:   #212529;
+      --text-secondary: #495057;
+      --text-muted:     #868e96;
+      --accent-hue:     var(--color-accent, #3b6fd4);
+      --accent-soft:    #dce8ff;
+      --accent-glow:    rgba(59,111,212,0.13);
+      --shadow-sm:      0 1px 3px rgba(0,0,0,0.07);
+      --shadow-md:      0 4px 16px rgba(0,0,0,0.09);
+      --shadow-lg:      0 12px 40px rgba(0,0,0,0.12);
+      --overlay:        rgba(33,37,41,0.5);
+    }
 
-.nav-logo {
-  color: var(--green);
-  font-size: 1em;
-  letter-spacing: 6px;
-  text-decoration: none;
-}
+    /* Dark */
+    [data-theme="dark"] {
+      --bg-base:        #0f1117;
+      --bg-surface:     #161b22;
+      --bg-elevated:    #1c2333;
+      --bg-sunken:      #090d13;
+      --border:         #2d3748;
+      --border-strong:  #4a5568;
+      --text-primary:   #e2e8f0;
+      --text-secondary: #a0aec0;
+      --text-muted:     #4a5568;
+      --accent-hue:     var(--color-accent, #63b3ed);
+      --accent-soft:    #1a2744;
+      --accent-glow:    rgba(99,179,237,0.12);
+      --shadow-sm:      0 1px 3px rgba(0,0,0,0.4);
+      --shadow-md:      0 4px 16px rgba(0,0,0,0.5);
+      --shadow-lg:      0 12px 40px rgba(0,0,0,0.6);
+      --overlay:        rgba(0,0,0,0.65);
+    }
 
-.nav-links {
-  display: flex;
-  gap: 30px;
-  list-style: none;
-}
+    /* Warm Dark */
+    [data-theme="warm-dark"] {
+      --bg-base:        #13100d;
+      --bg-surface:     #1a1510;
+      --bg-elevated:    #221c15;
+      --bg-sunken:      #0d0a07;
+      --border:         #3a2e22;
+      --border-strong:  #5a4a38;
+      --text-primary:   #f0e6d6;
+      --text-secondary: #b09070;
+      --text-muted:     #6a5040;
+      --accent-hue:     var(--color-accent, #e09450);
+      --accent-soft:    #2a1e0e;
+      --accent-glow:    rgba(224,148,80,0.12);
+      --shadow-sm:      0 1px 3px rgba(0,0,0,0.5);
+      --shadow-md:      0 4px 16px rgba(0,0,0,0.6);
+      --shadow-lg:      0 12px 40px rgba(0,0,0,0.7);
+      --overlay:        rgba(0,0,0,0.7);
+    }
 
-.nav-links a {
-  color: #444;
-  text-decoration: none;
-  font-size: 0.65em;
-  letter-spacing: 3px;
-  transition: color 0.2s;
-}
+    /* Accent színek */
+    [data-color="amber"]  { --color-accent: #b07d3a; }
+    [data-color="blue"]   { --color-accent: #3b6fd4; }
+    [data-color="teal"]   { --color-accent: #2a9d8f; }
+    [data-color="rose"]   { --color-accent: #c0546a; }
+    [data-color="violet"] { --color-accent: #7c4dcc; }
 
-.nav-links a:hover { color: var(--green); }
+    /* ═══════════════════════════════════════════
+       2. RESET & BASE
+       ═══════════════════════════════════════════ */
 
-/* HERO */
-.hero {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 100px 20px 60px;
-  position: relative;
-  overflow: hidden;
-}
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-.hero-bg {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  opacity: 0.03;
-  font-size: 0.7em;
-  line-height: 1.4;
-  word-break: break-all;
-  color: var(--green);
-  pointer-events: none;
-  animation: bgscroll 8s linear infinite;
-}
+    html {
+      font-size: 15px;
+      -webkit-font-smoothing: antialiased;
+    }
 
-@keyframes bgscroll {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-50%); }
-}
+    body {
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100vh;
+      transition: background 0.3s ease, color 0.3s ease;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
 
-.hero-badge {
-  display: inline-block;
-  border: 1px solid var(--green-dim);
-  color: var(--green);
-  font-size: 0.6em;
-  letter-spacing: 4px;
-  padding: 6px 16px;
-  margin-bottom: 30px;
-  background: rgba(0,255,136,0.03);
-}
+    /* ═══════════════════════════════════════════
+       3. TOPBAR
+       ═══════════════════════════════════════════ */
 
-.hero h1 {
-  font-size: clamp(2em, 6vw, 4.5em);
-  color: #ffffff;
-  letter-spacing: 4px;
-  line-height: 1.2;
-  margin-bottom: 20px;
-  font-family: 'Courier New', monospace;
-}
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 0 1.5rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      backdrop-filter: blur(8px);
+    }
 
-.hero h1 span { color: var(--green); }
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
 
-.hero-sub {
-  font-size: 0.8em;
-  letter-spacing: 3px;
-  color: #444;
-  margin-bottom: 50px;
-  max-width: 600px;
-  line-height: 1.8;
-}
+    .brand-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--accent-hue);
+      border-radius: 7px;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
 
-.hero-buttons {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-bottom: 80px;
-}
+    .brand-badge {
+      font-size: 0.65rem;
+      font-weight: 600;
+      background: var(--accent-soft);
+      color: var(--accent-hue);
+      padding: 2px 7px;
+      border-radius: 999px;
+      border: 1px solid var(--accent-hue);
+      letter-spacing: 0.03em;
+    }
 
-.btn-primary {
-  background: var(--green);
-  color: #000;
-  border: none;
-  font-family: 'Courier New', monospace;
-  font-size: 0.7em;
-  letter-spacing: 4px;
-  padding: 14px 28px;
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-block;
-  transition: all 0.2s;
-}
+    .topbar-nav {
+      display: flex;
+      gap: 0.25rem;
+      margin-left: 1rem;
+      flex: 1;
+    }
 
-.btn-primary:hover { background: #00cc6a; }
+    .nav-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.35rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: background 0.15s, color 0.15s;
+    }
 
-.btn-secondary {
-  background: transparent;
-  color: var(--green);
-  border: 1px solid var(--green-dim);
-  font-family: 'Courier New', monospace;
-  font-size: 0.7em;
-  letter-spacing: 4px;
-  padding: 14px 28px;
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-block;
-  transition: all 0.2s;
-}
+    .nav-btn:hover {
+      background: var(--bg-sunken);
+      color: var(--text-primary);
+    }
 
-.btn-secondary:hover { background: var(--green-dim); }
+    .nav-btn.active {
+      background: var(--accent-soft);
+      color: var(--accent-hue);
+    }
 
-/* LIVE DEMO */
-.live-demo {
-  display: flex;
-  gap: 20px;
-  max-width: 800px;
-  width: 100%;
-}
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-left: auto;
+    }
 
-.demo-panel {
-  flex: 1;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 20px;
-}
+    /* Status pill */
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: var(--bg-sunken);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      letter-spacing: 0.02em;
+    }
 
-.demo-label {
-  font-size: 0.55em;
-  letter-spacing: 3px;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border);
-}
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #9ca3af;
+      transition: background 0.3s;
+    }
 
-.demo-human .demo-label { color: var(--green); }
-.demo-ai .demo-label { color: var(--red); }
+    .status-dot.active {
+      background: #22c55e;
+      box-shadow: 0 0 0 3px rgba(34,197,94,0.25);
+      animation: pulse-green 2s infinite;
+    }
 
-.demo-text {
-  font-size: 0.75em;
-  line-height: 1.8;
-  min-height: 80px;
-}
+    .status-dot.warning {
+      background: #f59e0b;
+      box-shadow: 0 0 0 3px rgba(245,158,11,0.25);
+    }
 
-.demo-human .demo-text { color: var(--green); font-family: Georgia, serif; }
-.demo-ai .demo-text { color: var(--red); word-break: break-all; }
+    @keyframes pulse-green {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(34,197,94,0.25); }
+      50%       { box-shadow: 0 0 0 5px rgba(34,197,94,0.10); }
+    }
 
-/* STATS */
-.stats {
-  display: flex;
-  gap: 40px;
-  margin-top: 60px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
+    /* Theme picker trigger */
+    .theme-trigger {
+      background: var(--bg-sunken);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.35rem 0.65rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: border-color 0.15s, background 0.15s;
+    }
 
-.stat {
-  text-align: center;
-}
+    .theme-trigger:hover {
+      border-color: var(--border-strong);
+      background: var(--bg-elevated);
+    }
 
-.stat-number {
-  font-size: 2.5em;
-  color: var(--green);
-  display: block;
-}
+    /* ═══════════════════════════════════════════
+       4. THEME PANEL (dropdown)
+       ═══════════════════════════════════════════ */
 
-.stat-label {
-  font-size: 0.55em;
-  letter-spacing: 3px;
-  color: #333;
-  margin-top: 4px;
-}
+    .theme-panel-wrapper {
+      position: relative;
+    }
 
-/* SECTIONS */
-section {
-  padding: 80px 20px;
-  max-width: 1000px;
-  margin: 0 auto;
-}
+    .theme-panel {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-lg);
+      padding: 1.1rem;
+      width: 260px;
+      z-index: 200;
+      display: none;
+      animation: panel-in 0.15s ease;
+    }
 
-.section-label {
-  font-size: 0.6em;
-  letter-spacing: 4px;
-  color: #333;
-  margin-bottom: 10px;
-}
+    .theme-panel.open { display: block; }
 
-.section-title {
-  font-size: clamp(1.2em, 3vw, 2em);
-  color: #ffffff;
-  letter-spacing: 3px;
-  margin-bottom: 40px;
-}
+    @keyframes panel-in {
+      from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
 
-/* HOW IT WORKS */
-.steps {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-}
+    .panel-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.6rem;
+    }
 
-.step {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 24px;
-}
+    .theme-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+    }
 
-.step-num {
-  font-size: 2em;
-  color: var(--green-dim);
-  margin-bottom: 12px;
-}
+    .theme-option {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.6rem;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: var(--bg-surface);
+      transition: all 0.15s;
+    }
 
-.step-title {
-  color: #ffffff;
-  font-size: 0.8em;
-  letter-spacing: 2px;
-  margin-bottom: 8px;
-}
+    .theme-option:hover { border-color: var(--accent-hue); color: var(--text-primary); }
+    .theme-option.selected {
+      border-color: var(--accent-hue);
+      background: var(--accent-soft);
+      color: var(--accent-hue);
+    }
 
-.step-desc {
-  font-size: 0.65em;
-  letter-spacing: 1px;
-  color: #444;
-  line-height: 1.7;
-}
+    .theme-swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      flex-shrink: 0;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
 
-/* FEATURES */
-.features {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
-}
+    .color-row {
+      display: flex;
+      gap: 0.4rem;
+    }
 
-.feature {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 24px;
-  transition: border-color 0.2s;
-}
+    .color-dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.15s, border-color 0.15s;
+    }
 
-.feature:hover { border-color: var(--green-dim); }
+    .color-dot:hover { transform: scale(1.15); }
+    .color-dot.selected {
+      border-color: var(--text-primary);
+      transform: scale(1.1);
+    }
 
-.feature-icon {
-  font-size: 1.5em;
-  margin-bottom: 12px;
-}
+    /* Auto mode toggle */
+    .auto-row {
+      margin-top: 0.8rem;
+      padding-top: 0.8rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
 
-.feature-title {
-  color: #ffffff;
-  font-size: 0.75em;
-  letter-spacing: 2px;
-  margin-bottom: 8px;
-}
+    .toggle-switch {
+      position: relative;
+      width: 34px;
+      height: 18px;
+    }
 
-.feature-desc {
-  font-size: 0.62em;
-  letter-spacing: 1px;
-  color: #444;
-  line-height: 1.8;
-}
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
 
-/* USE CASES */
-.usecases {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-}
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: var(--border-strong);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
 
-.usecase {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 20px;
-  text-align: center;
-}
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      left: 2px;
+      top: 2px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: white;
+      transition: transform 0.2s;
+    }
 
-.usecase-icon { font-size: 2em; margin-bottom: 10px; }
+    .toggle-switch input:checked + .toggle-track {
+      background: var(--accent-hue);
+    }
 
-.usecase-title {
-  color: #ffffff;
-  font-size: 0.7em;
-  letter-spacing: 2px;
-  margin-bottom: 6px;
-}
+    .toggle-switch input:checked + .toggle-track::after {
+      transform: translateX(16px);
+    }
 
-.usecase-desc {
-  font-size: 0.6em;
-  color: #444;
-  letter-spacing: 1px;
-  line-height: 1.6;
-}
+    /* ═══════════════════════════════════════════
+       5. MAIN LAYOUT
+       ═══════════════════════════════════════════ */
 
-/* CTA */
-.cta-section {
-  text-align: center;
-  padding: 80px 20px;
-  border-top: 1px solid var(--border);
-}
+    .main {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
 
-.cta-title {
-  font-size: clamp(1.5em, 4vw, 3em);
-  color: #ffffff;
-  letter-spacing: 4px;
-  margin-bottom: 16px;
-}
+    /* Stats row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.85rem;
+    }
 
-.cta-sub {
-  font-size: 0.7em;
-  letter-spacing: 2px;
-  color: #444;
-  margin-bottom: 40px;
-}
+    .stat-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.1rem 1.25rem;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      transition: box-shadow 0.2s, border-color 0.2s;
+    }
 
-/* FOOTER */
-footer {
-  border-top: 1px solid var(--border);
-  padding: 30px 40px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-}
+    .stat-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: var(--border-strong);
+    }
 
-.footer-logo { color: var(--green); letter-spacing: 4px; font-size: 0.8em; }
-.footer-text { color: #222; font-size: 0.55em; letter-spacing: 2px; }
+    .stat-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
 
-/* DIVIDER */
-.divider {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 0;
-}
-</style>
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .stat-accent { color: var(--accent-hue); }
+
+    /* ═══════════════════════════════════════════
+       6. PANEL GRID
+       ═══════════════════════════════════════════ */
+
+    .panel-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 900px) {
+      .panel-grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-full { grid-column: 1 / -1; }
+
+    .panel-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: var(--bg-elevated);
+    }
+
+    .panel-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--accent-soft);
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    .panel-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .panel-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .panel-actions {
+      margin-left: auto;
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .panel-body {
+      padding: 1.25rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    /* ═══════════════════════════════════════════
+       7. FORM ELEMENTS
+       ═══════════════════════════════════════════ */
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .field-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .field-label .badge {
+      font-size: 0.65rem;
+      background: var(--accent-soft);
+      color: var(--accent-hue);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    textarea, input[type="text"], input[type="number"] {
+      width: 100%;
+      background: var(--bg-sunken);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.82rem;
+      color: var(--text-primary);
+      font-family: inherit;
+      resize: vertical;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      outline: none;
+    }
+
+    textarea:focus, input:focus {
+      border-color: var(--accent-hue);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    textarea {
+      min-height: 90px;
+      line-height: 1.6;
+    }
+
+    /* Slider */
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .slider-row input[type="range"] {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      outline: none;
+      cursor: pointer;
+      padding: 0;
+      border: none;
+      box-shadow: none;
+    }
+
+    .slider-row input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent-hue);
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+
+    .slider-row input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .slider-val {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--accent-hue);
+      min-width: 1.5rem;
+      text-align: center;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      border-radius: 7px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--accent-hue);
+      color: #fff;
+      border-color: var(--accent-hue);
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.1);
+      box-shadow: 0 2px 8px var(--accent-glow);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      border-color: var(--border);
+    }
+
+    .btn-ghost:hover {
+      background: var(--bg-sunken);
+      color: var(--text-primary);
+    }
+
+    .btn-danger {
+      background: transparent;
+      color: #ef4444;
+      border-color: #fca5a5;
+    }
+
+    .btn-danger:hover {
+      background: #fef2f2;
+      border-color: #ef4444;
+    }
+
+    .btn-sm { padding: 0.3rem 0.65rem; font-size: 0.75rem; }
+
+    /* ═══════════════════════════════════════════
+       8. OUTPUT BOX
+       ═══════════════════════════════════════════ */
+
+    .output-box {
+      background: var(--bg-sunken);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-family: 'Fira Code', 'Cascadia Code', monospace;
+      min-height: 70px;
+      line-height: 1.7;
+      word-break: break-all;
+      position: relative;
+    }
+
+    .output-box.has-content {
+      color: var(--text-primary);
+    }
+
+    .output-placeholder {
+      color: var(--text-muted);
+      font-style: italic;
+      font-size: 0.75rem;
+      font-family: inherit;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.7rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.15s;
+    }
+
+    .copy-btn:hover {
+      color: var(--accent-hue);
+      border-color: var(--accent-hue);
+    }
+
+    /* ═══════════════════════════════════════════
+       9. CHAR ANALYSIS BAR
+       ═══════════════════════════════════════════ */
+
+    .analysis-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .analysis-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.75rem;
+    }
+
+    .analysis-label { color: var(--text-muted); min-width: 110px; }
+
+    .bar-track {
+      flex: 1;
+      height: 5px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--accent-hue);
+      transition: width 0.4s ease;
+    }
+
+    .analysis-num {
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+      min-width: 36px;
+      text-align: right;
+      font-size: 0.72rem;
+    }
+
+    /* ═══════════════════════════════════════════
+       10. EVENT LOG
+       ═══════════════════════════════════════════ */
+
+    .log-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .log-filter {
+      display: flex;
+      gap: 0.25rem;
+    }
+
+    .filter-chip {
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      transition: all 0.15s;
+    }
+
+    .filter-chip.active {
+      background: var(--accent-soft);
+      border-color: var(--accent-hue);
+      color: var(--accent-hue);
+    }
+
+    .log-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      max-height: 320px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    .log-entry {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 0.6rem;
+      align-items: start;
+      padding: 0.55rem 0.75rem;
+      border-radius: 7px;
+      border: 1px solid transparent;
+      font-size: 0.75rem;
+      transition: background 0.1s;
+      background: var(--bg-sunken);
+    }
+
+    .log-entry:hover {
+      border-color: var(--border);
+      background: var(--bg-elevated);
+    }
+
+    .log-type-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      margin-top: 4px;
+      flex-shrink: 0;
+    }
+
+    .dot-info    { background: #60a5fa; }
+    .dot-warn    { background: #f59e0b; }
+    .dot-danger  { background: #ef4444; }
+    .dot-success { background: #22c55e; }
+
+    .log-type {
+      font-weight: 700;
+      color: var(--text-primary);
+      font-family: 'Fira Code', monospace;
+      font-size: 0.72rem;
+    }
+
+    .log-meta {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+    }
+
+    .log-time {
+      color: var(--text-muted);
+      font-size: 0.68rem;
+      white-space: nowrap;
+    }
+
+    .log-empty {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    /* ═══════════════════════════════════════════
+       11. ENCRYPTION PANEL
+       ═══════════════════════════════════════════ */
+
+    .enc-tabs {
+      display: flex;
+      gap: 0.25rem;
+      border-bottom: 1px solid var(--border);
+      margin: -1.25rem -1.25rem 0;
+      padding: 0 1.25rem;
+    }
+
+    .enc-tab {
+      padding: 0.6rem 1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .enc-tab.active {
+      color: var(--accent-hue);
+      border-bottom-color: var(--accent-hue);
+    }
+
+    .enc-tab-content { display: none; }
+    .enc-tab-content.active { display: flex; flex-direction: column; gap: 0.85rem; }
+
+    /* ═══════════════════════════════════════════
+       12. RATE LIMITER GAUGE
+       ═══════════════════════════════════════════ */
+
+    .gauge-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .gauge-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+    }
+
+    .gauge-track {
+      height: 8px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .gauge-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--accent-hue);
+      transition: width 0.4s ease, background 0.3s;
+    }
+
+    .gauge-fill.warn  { background: #f59e0b; }
+    .gauge-fill.danger { background: #ef4444; }
+
+    /* ═══════════════════════════════════════════
+       13. TOAST NOTIFICATIONS
+       ═══════════════════════════════════════════ */
+
+    .toast-container {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.7rem 1rem;
+      box-shadow: var(--shadow-lg);
+      font-size: 0.8rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      pointer-events: all;
+      animation: toast-in 0.2s ease;
+      max-width: 300px;
+    }
+
+    @keyframes toast-in {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .toast.out {
+      animation: toast-out 0.2s ease forwards;
+    }
+
+    @keyframes toast-out {
+      to { opacity: 0; transform: translateY(5px); }
+    }
+
+    /* ═══════════════════════════════════════════
+       14. FOOTER
+       ═══════════════════════════════════════════ */
+
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 0.85rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      background: var(--bg-surface);
+    }
+
+    /* ═══════════════════════════════════════════
+       15. MODAL (log detail)
+       ═══════════════════════════════════════════ */
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay);
+      z-index: 500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(3px);
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      width: min(90vw, 480px);
+      box-shadow: var(--shadow-lg);
+      animation: panel-in 0.2s ease;
+    }
+
+    .modal-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+    }
+
+    .modal-code {
+      background: var(--bg-sunken);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.85rem;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .modal-actions { margin-top: 1rem; display: flex; justify-content: flex-end; gap: 0.5rem; }
+
+    /* ═══════════════════════════════════════════
+       16. SECTION TABS (fő navigáció)
+       ═══════════════════════════════════════════ */
+
+    .section { display: none; }
+    .section.active { display: contents; }
+  </style>
 </head>
+
 <body>
 
-<!-- NAV -->
-<nav>
-  <a class="nav-logo" href="index.html">⬡ PHANTOM</a>
-  <ul class="nav-links">
-    <li><a href="publisher/index.html">PUBLISHER</a></li>
-    <li><a href="reader/index.html">READER</a></li>
-    <li><a href="dashboard/index.html">DASHBOARD</a></li>
-    <li><a href="extension/popup.html">EXTENSION</a></li>
-  </ul>
-</nav>
+  <!-- ════════════════════════════════════════
+       TOPBAR
+  ════════════════════════════════════════ -->
+  <header class="topbar">
+    <a class="topbar-brand" href="#">
+      <div class="brand-icon">🛡</div>
+      <span>Phantom Core</span>
+      <span class="brand-badge">v3.0</span>
+    </a>
 
-<!-- HERO -->
-<div class="hero">
-  <div class="hero-bg" id="hero-bg"></div>
+    <nav class="topbar-nav">
+      <button class="nav-btn active" data-section="overview">Overview</button>
+      <button class="nav-btn" data-section="protection">Protection</button>
+      <button class="nav-btn" data-section="encryption">Encryption</button>
+      <button class="nav-btn" data-section="eventlog">Event Log</button>
+    </nav>
 
-  <div class="hero-badge">⬡ PHANTOM v1.0 · AI PROTECTION SYSTEM</div>
+    <div class="topbar-actions">
+      <div class="status-pill">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="statusLabel">Initializing…</span>
+      </div>
 
-  <h1>AZ AI NEM<br>LÁTHATJA<br><span>A SZAVAID</span></h1>
+      <div class="theme-panel-wrapper">
+        <button class="theme-trigger" id="themeTrigger">
+          🎨 <span id="themeLabel">Warm White</span>
+        </button>
 
-  <p class="hero-sub">
-    Írd meg a cikkedet, blogodat, gondolataidat.<br>
-    Az emberek olvassák. Az AI-ok soha.
-  </p>
+        <div class="theme-panel" id="themePanel">
+          <div class="panel-label">Megjelenés</div>
+          <div class="theme-grid">
+            <div class="theme-option selected" data-theme="warm-white">
+              <div class="theme-swatch" style="background:linear-gradient(135deg,#f8f5f0,#e8dcc8)"></div>
+              Warm White
+            </div>
+            <div class="theme-option" data-theme="slate">
+              <div class="theme-swatch" style="background:linear-gradient(135deg,#f1f3f5,#dee2e6)"></div>
+              Slate
+            </div>
+            <div class="theme-option" data-theme="dark">
+              <div class="theme-swatch" style="background:linear-gradient(135deg,#1c2333,#0f1117)"></div>
+              Dark
+            </div>
+            <div class="theme-option" data-theme="warm-dark">
+              <div class="theme-swatch" style="background:linear-gradient(135deg,#221c15,#13100d)"></div>
+              Warm Dark
+            </div>
+          </div>
 
-  <div class="hero-buttons">
-    <a href="publisher/index.html" class="btn-primary">[ ÍRJ MOST ]</a>
-    <a href="dashboard/index.html" class="btn-secondary">[ DASHBOARD ]</a>
+          <div class="panel-label">Accent szín</div>
+          <div class="color-row">
+            <div class="color-dot selected" data-color="amber"  style="background:#b07d3a" title="Amber"></div>
+            <div class="color-dot" data-color="blue"   style="background:#3b6fd4" title="Blue"></div>
+            <div class="color-dot" data-color="teal"   style="background:#2a9d8f" title="Teal"></div>
+            <div class="color-dot" data-color="rose"   style="background:#c0546a" title="Rose"></div>
+            <div class="color-dot" data-color="violet" style="background:#7c4dcc" title="Violet"></div>
+          </div>
+
+          <div class="auto-row">
+            <span>Rendszer téma (auto)</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="autoTheme" />
+              <div class="toggle-track"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ════════════════════════════════════════
+       MAIN
+  ════════════════════════════════════════ -->
+  <main class="main">
+
+    <!-- ── OVERVIEW ── -->
+    <div class="section active" id="sec-overview">
+
+      <!-- Stats row -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Védett műveletek</div>
+          <div class="stat-value stat-accent" id="statProtected">0</div>
+          <div class="stat-sub">protect() hívások</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Titkosítások</div>
+          <div class="stat-value stat-accent" id="statEncrypted">0</div>
+          <div class="stat-sub">AES-256-GCM</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Log bejegyzések</div>
+          <div class="stat-value" id="statLogs">0</div>
+          <div class="stat-sub">utolsó session</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">DevTools</div>
+          <div class="stat-value" id="statDevTools">—</div>
+          <div class="stat-sub" id="statDevToolsSub">nem detektálva</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Rate limiter</div>
+          <div class="stat-value" id="statRate">15/15</div>
+          <div class="stat-sub">elérhető hívás</div>
+        </div>
+      </div>
+
+      <!-- Panel grid -->
+      <div class="panel-grid">
+
+        <!-- Rate limiter gauge -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-icon">⚡</div>
+            <div>
+              <div class="panel-title">Rate Limiter</div>
+              <div class="panel-desc">Sliding window — 30s</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="gauge-row">
+              <div class="gauge-header">
+                <span style="font-size:.75rem;color:var(--text-secondary)">Felhasznált hívások</span>
+                <span style="font-size:.75rem;font-weight:700;color:var(--text-primary)" id="gaugeLabel">0 / 15</span>
+              </div>
+              <div class="gauge-track">
+                <div class="gauge-fill" id="gaugeFill" style="width:0%"></div>
+              </div>
+              <div style="font-size:.72rem;color:var(--text-muted)">
+                Reset: <span id="gaugeReset">—</span>
+              </div>
+            </div>
+
+            <div class="analysis-bar" id="overviewAnalysis">
+              <div class="analysis-row">
+                <span class="analysis-label">Keyboard blokkok</span>
+                <div class="bar-track"><div class="bar-fill" id="barKeyboard" style="width:0%"></div></div>
+                <span class="analysis-num" id="numKeyboard">0</span>
+              </div>
+              <div class="analysis-row">
+                <span class="analysis-label">Honeypot triggerek</span>
+                <div class="bar-track"><div class="bar-fill" id="barHoneypot" style="width:0%"></div></div>
+                <span class="analysis-num" id="numHoneypot">0</span>
+              </div>
+              <div class="analysis-row">
+                <span class="analysis-label">DevTools észlelés</span>
+                <div class="bar-track"><div class="bar-fill" id="barDevtools" style="width:0%"></div></div>
+                <span class="analysis-num" id="numDevtools">0</span>
+              </div>
+              <div class="analysis-row">
+                <span class="analysis-label">Rate limit túllépés</span>
+                <div class="bar-track"><div class="bar-fill" id="barRate" style="width:0%"></div></div>
+                <span class="analysis-num" id="numRate">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick protect -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-icon">🔤</div>
+            <div>
+              <div class="panel-title">Gyors szövegvédelem</div>
+              <div class="panel-desc">Invisible chars + homoglyphs</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="field-group">
+              <label class="field-label">Szöveg</label>
+              <textarea id="quickInput" placeholder="Írd be a védendő szöveget…" rows="3"></textarea>
+            </div>
+            <div class="field-group">
+              <label class="field-label">
+                Védelem szintje
+                <span class="badge" id="quickLevelLabel">3</span>
+              </label>
+              <div class="slider-row">
+                <input type="range" min="1" max="5" value="3" id="quickLevel" />
+                <span class="slider-val" id="quickLevelVal">3</span>
+              </div>
+            </div>
+            <button class="btn btn-primary" id="quickProtectBtn">🛡 Védelem alkalmazása</button>
+            <div class="field-group">
+              <label class="field-label">Eredmény</label>
+              <div class="output-box" id="quickOutput">
+                <span class="output-placeholder">Az eredmény itt jelenik meg…</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── PROTECTION ── -->
+    <div class="section" id="sec-protection">
+      <div class="panel-grid">
+
+        <!-- Szövegvédelem részletes -->
+        <div class="panel panel-full">
+          <div class="panel-header">
+            <div class="panel-icon">🔬</div>
+            <div>
+              <div class="panel-title">Szövegvédelem — részletes elemzés</div>
+              <div class="panel-desc">Invisible char + homoglyph rétegek vizsgálata</div>
+            </div>
+          </div>
+          <div class="panel-body" style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
+
+            <div style="display:flex;flex-direction:column;gap:1rem">
+              <div class="field-group">
+                <label class="field-label">Bemeneti szöveg</label>
+                <textarea id="protectInput" placeholder="A védendő szöveg…" rows="5"></textarea>
+              </div>
+              <div class="field-group">
+                <label class="field-label">
+                  Invisible char sűrűség
+                  <span class="badge" id="invLabel">0.30</span>
+                </label>
+                <div class="slider-row">
+                  <input type="range" min="0" max="100" value="30" id="invDensity" />
+                  <span class="slider-val" id="invVal">0.30</span>
+                </div>
+              </div>
+              <div class="field-group">
+                <label class="field-label">
+                  Homoglyph arány
+                  <span class="badge" id="homLabel">0.20</span>
+                </label>
+                <div class="slider-row">
+                  <input type="range" min="0" max="100" value="20" id="homRate" />
+                  <span class="slider-val" id="homVal">0.20</span>
+                </div>
+              </div>
+              <button class="btn btn-primary" id="analyzeBtn">🔍 Elemzés + védelem</button>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:1rem">
+              <div class="field-group">
+                <label class="field-label">Védett szöveg</label>
+                <div class="output-box" id="protectOutput" style="min-height:120px">
+                  <span class="output-placeholder">Eredmény…</span>
+                </div>
+              </div>
+
+              <div class="analysis-bar" id="detailAnalysis">
+                <div class="analysis-row">
+                  <span class="analysis-label">Eredeti hossz</span>
+                  <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+                  <span class="analysis-num" id="origLen">0</span>
+                </div>
+                <div class="analysis-row">
+                  <span class="analysis-label">Védett hossz</span>
+                  <div class="bar-track"><div class="bar-fill" id="protBar" style="width:0%"></div></div>
+                  <span class="analysis-num" id="protLen">0</span>
+                </div>
+                <div class="analysis-row">
+                  <span class="analysis-label">Láthatatlan char</span>
+                  <div class="bar-track"><div class="bar-fill" id="invBar" style="width:0%"></div></div>
+                  <span class="analysis-num" id="invCount">0</span>
+                </div>
+                <div class="analysis-row">
+                  <span class="analysis-label">Homoglyph csere</span>
+                  <div class="bar-track"><div class="bar-fill" id="homBar" style="width:0%"></div></div>
+                  <span class="analysis-num" id="homCount">0</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Copy protection -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-icon">📋</div>
+            <div>
+              <div class="panel-title">Copy Protection</div>
+              <div class="panel-desc">Vágólap védelem tesztelése</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div style="
+              background: var(--accent-soft);
+              border: 1px dashed var(--accent-hue);
+              border-radius: 8px;
+              padding: 1rem;
+              font-size: 0.82rem;
+              color: var(--text-secondary);
+              line-height: 1.7;
+              user-select: none;
+            " id="copyProtectedArea">
+              Ez a szöveg copy-protection védelemmel ellátott. Próbáld meg kimásolni — a vágólap tartalma helyett védelmi üzenetet kapsz.
+            </div>
+            <div style="font-size:.75rem;color:var(--text-muted)">
+              💡 Válassz ki szöveget és másolj (Ctrl+C) — a vágólap tartalma meg fog változni.
+            </div>
+            <div class="field-group">
+              <label class="field-label">Vágólap teszt — illeszd be ide</label>
+              <textarea id="pasteTest" placeholder="Ctrl+V itt…" rows="2"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- DevTools status -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-icon">🔎</div>
+            <div>
+              <div class="panel-title">DevTools Detektor</div>
+              <div class="panel-desc">Valós idejű figyelés</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div style="
+              display:flex;
+              flex-direction:column;
+              gap:.6rem;
+              padding:1rem;
+              background:var(--bg-sunken);
+              border-radius:8px;
+              border:1px solid var(--border);
+            ">
+              <div style="display:flex;justify-content:space-between;font-size:.8rem">
+                <span style="color:var(--text-secondary)">Státusz</span>
+                <span id="dtStatus" style="font-weight:700;color:var(--text-primary)">Figyelés…</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:.8rem">
+                <span style="color:var(--text-secondary)">Szélességkülönbség</span>
+                <span id="dtWidth" style="font-family:monospace;color:var(--text-muted)">—</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:.8rem">
+                <span style="color:var(--text-secondary)">Magasságkülönbség</span>
+                <span id="dtHeight" style="font-family:monospace;color:var(--text-muted)">—</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:.8rem">
+                <span style="color:var(--text-secondary)">Észlelések száma</span>
+                <span id="dtCount" style="font-weight:700;font-variant-numeric:tabular-nums">0</span>
+              </div>
+            </div>
+            <div style="font-size:.72rem;color:var(--text-muted);line-height:1.6">
+              ⚠️ A window méret alapú detektálás heurisztikus — hamis pozitívok lehetségesek (splitscreen, zoom, stb.).
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── ENCRYPTION ── -->
+    <div class="section" id="sec-encryption">
+      <div class="panel-grid">
+
+        <div class="panel panel-full">
+          <div class="panel-header">
+            <div class="panel-icon">🔐</div>
+            <div>
+              <div class="panel-title">AES-256-GCM Titkosítás</div>
+              <div class="panel-desc">Web Crypto API — authenticated encryption</div>
+            </div>
+            <div class="panel-actions">
+              <button class="btn btn-ghost btn-sm" id="regenKeyBtn">🔑 Kulcs újragenerálás</button>
+            </div>
+          </div>
+          <div class="panel-body">
+
+            <div class="enc-tabs">
+              <button class="enc-tab active" data-tab="enc">Titkosítás</button>
+              <button class="enc-tab" data-tab="dec">Visszafejtés</button>
+              <button class="enc-tab" data-tab="key">Kulcskezelés</button>
+            </div>
+
+            <!-- Encrypt tab -->
+            <div class="enc-tab-content active" id="tab-enc">
+              <div class="field-group">
+                <label class="field-label">Titkosítandó szöveg</label>
+                <textarea id="encInput" placeholder="Titkos tartalom…" rows="4"></textarea>
+              </div>
+              <button class="btn btn-primary" id="encBtn">🔒 Titkosítás</button>
+              <div class="field-group">
+                <label class="field-label">
+                  Titkosított kimenet
+                  <span class="badge">base64(iv+ciphertext)</span>
+                </label>
+                <div class="output-box" id="encOutput" style="min-height:80px;position:relative">
+                  <span class="output-placeholder">Titkosított adat…</span>
+                  <button class="copy-btn" id="encCopyBtn" style="display:none">Másolás</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Decrypt tab -->
+            <div class="enc-tab-content" id="tab-dec">
+              <div class="field-group">
+                <label class="field-label">Titkosított szöveg (base64)</label>
+                <textarea id="decInput" placeholder="Illeszd be a titkosított szöveget…" rows="4"></textarea>
+              </div>
+              <button class="btn btn-primary" id="decBtn">🔓 Visszafejtés</button>
+              <div class="field-group">
+                <label class="field-label">Visszafejtett szöveg</label>
+                <div class="output-box" id="decOutput" style="min-height:80px">
+                  <span class="output-placeholder">Visszafejtett tartalom…</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Key tab -->
+            <div class="enc-tab-content" id="tab-key">
+              <div style="
+                background:var(--bg-sunken);
+                border:1px solid var(--border);
+                border-radius:8px;
+                padding:1rem;
+                display:flex;
+                flex-direction:column;
+                gap:.6rem;
+              ">
+                <div style="display:flex;justify-content:space-between;font-size:.8rem">
+                  <span style="color:var(--text-secondary)">Algoritmus</span>
+                  <span style="font-weight:600;font-family:monospace">AES-GCM / 256-bit</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:.8rem">
+                  <span style="color:var(--text-secondary)">IV méret</span>
+                  <span style="font-family:monospace">96-bit (12 byte)</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:.8rem">
+                  <span style="color:var(--text-secondary)">Kulcs tárolás</span>
+                  <span style="font-family:monospace">localStorage (exportált)</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:.8rem">
+                  <span style="color:var(--text-secondary)">Kulcs állapot</span>
+                  <span id="keyStatus" style="font-weight:700">—</span>
+                </div>
+              </div>
+              <div class="field-group">
+                <label class="field-label">Aktuális kulcs (base64-exportált)</label>
+                <div class="output-box" id="keyDisplay" style="min-height:60px;word-break:break-all">
+                  <span class="output-placeholder">Kulcs betöltés…</span>
+                </div>
+              </div>
+              <div style="font-size:.72rem;color:var(--text-muted);line-height:1.6">
+                ⚠️ A kulcs client-side tárolódik — ha valaki a localStorage-t olvashatja, a kulcs is elérhető. Ez az encryption az "inert data at rest" ellen véd.
+              </div>
+              <button class="btn btn-danger btn-sm" id="clearKeyBtn">🗑 Kulcs törlése (localStorage)</button>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── EVENT LOG ── -->
+    <div class="section" id="sec-eventlog">
+      <div class="panel-grid">
+
+        <div class="panel panel-full">
+          <div class="panel-header">
+            <div class="panel-icon">📋</div>
+            <div>
+              <div class="panel-title">Event Log</div>
+              <div class="panel-desc">Minden biztonsági esemény — circular buffer (200)</div>
+            </div>
+            <div class="panel-actions">
+              <button class="btn btn-ghost btn-sm" id="refreshLogBtn">↺ Frissítés</button>
+              <button class="btn btn-danger btn-sm" id="clearLogBtn">🗑 Törlés</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="log-toolbar">
+              <div class="log-filter" id="logFilter">
+                <button class="filter-chip active" data-filter="all">Összes</button>
+                <button class="filter-chip" data-filter="init">Init</button>
+                <button class="filter-chip" data-filter="keyboard">Keyboard</button>
+                <button class="filter-chip" data-filter="devtools">DevTools</button>
+                <button class="filter-chip" data-filter="encrypt">Encrypt</button>
+                <button class="filter-chip" data-filter="rate">Rate</button>
+              </div>
+            </div>
+            <div class="log-list" id="logList">
+              <div class="log-empty">Nincs napló bejegyzés.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <span>Phantom Core Engine <strong>v3.0.0</strong> — Principal Engineer Build</span>
+    <span id="footerTime">—</span>
+  </footer>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-title" id="modalTitle">Esemény részletei</div>
+      <pre class="modal-code" id="modalBody"></pre>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="modalClose">Bezárás</button>
+      </div>
+    </div>
   </div>
 
-  <!-- LIVE DEMO -->
-  <div class="live-demo">
-    <div class="demo-panel demo-human">
-      <div class="demo-label">▶ EMBER LÁTJA</div>
-      <div class="demo-text" id="demo-human">A mesterséges intelligencia nem olvashatja ezt a szöveget.</div>
-    </div>
-    <div class="demo-panel demo-ai">
-      <div class="demo-label">▶ AI LÁTJA</div>
-      <div class="demo-text" id="demo-ai"></div>
-    </div>
-  </div>
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toastContainer"></div>
 
-  <div class="stats">
-    <div class="stat">
-      <span class="stat-number" id="stat-articles">0</span>
-      <span class="stat-label">VÉDETT CIKK</span>
-    </div>
-    <div class="stat">
-      <span class="stat-number" id="stat-attacks">0</span>
-      <span class="stat-label">BLOKOLT TÁMADÁS</span>
-    </div>
-    <div class="stat">
-      <span class="stat-number">∞</span>
-      <span class="stat-label">AI PLATFORM VÉDVE</span>
-    </div>
-  </div>
-</div>
+  <!-- ENGINE -->
+  <script src="phantom-engine.js"></script>
 
-<hr class="divider">
+  <script>
+    'use strict'
 
-<!-- HOW IT WORKS -->
-<section>
-  <div class="section-label">▶ HOGYAN MŰKÖDIK</div>
-  <div class="section-title">3 LÉPÉS. TELJES VÉDELEM.</div>
-  <div class="steps">
-    <div class="step">
-      <div class="step-num">01</div>
-      <div class="step-title">ÍRSZ</div>
-      <div class="step-desc">Megírod a cikkedet a Phantom Publisherben. Normálisan, ahogy szoktad.</div>
-    </div>
-    <div class="step">
-      <div class="step-num">02</div>
-      <div class="step-title">PHANTOM VÉDI</div>
-      <div class="step-desc">A rendszer automatikusan két réteget hoz létre. Ember látja az igazit. AI csak zajt lát.</div>
-    </div>
-    <div class="step">
-      <div class="step-num">03</div>
-      <div class="step-title">ÖRÖKKÉ MOZOG</div>
-      <div class="step-desc">A phantom réteg folyamatosan változik. Ha valaki feltörni próbálja – dupla zaj aktiválódik.</div>
-    </div>
-    <div class="step">
-      <div class="step-num">04</div>
-      <div class="step-title">TE LÁTOD KI PRÓBÁLTA</div>
-      <div class="step-desc">A Dashboard megmutatja minden feltörési kísérletet. Valós időben.</div>
-    </div>
-  </div>
-</section>
+    // ════════════════════════════════════════
+    // DASHBOARD CONTROLLER
+    // ════════════════════════════════════════
 
-<hr class="divider">
+    const Dashboard = (() => {
 
-<!-- FEATURES -->
-<section>
-  <div class="section-label">▶ VÉDELMI RÉTEGEK</div>
-  <div class="section-title">FELTÖRHETETLEN RENDSZER</div>
-  <div class="features">
-    <div class="feature">
-      <div class="feature-icon">⬡</div>
-      <div class="feature-title">PHANTOM CHAT</div>
-      <div class="feature-desc">Chrome Extension. Amit beírsz Claude-nak, ChatGPT-nek, Gemini-nek – az AI soha nem látja tisztán.</div>
-    </div>
-    <div class="feature">
-      <div class="feature-icon">◈</div>
-      <div class="feature-title">PHANTOM PUBLISHER</div>
-      <div class="feature-desc">Írd meg a cikkedet nálunk. Automatikusan védett lesz minden AI crawler ellen.</div>
-    </div>
-    <div class="feature">
-      <div class="feature-icon">⊛</div>
-      <div class="feature-title">CLIPBOARD VÉDELEM</div>
-      <div class="feature-desc">Ha valaki kimásolja a cikkedet – phantom szöveget kap. Hiába illeszti be az AI-nak.</div>
-    </div>
-    <div class="feature">
-      <div class="feature-icon">∿</div>
-      <div class="feature-title">FOLYAMATOS MOZGÁS</div>
-      <div class="feature-desc">A phantom réteg soha nem áll meg. Ha valaki megpróbálja megfigyelni – mindig mást lát.</div>
-    </div>
-    <div class="feature">
-      <div class="feature-icon">⍟</div>
-      <div class="feature-title">TÁMADÁSVÉDELEM</div>
-      <div class="feature-desc">Feltörési kísérlet esetén automatikusan dupla zaj, dupla sebesség aktiválódik.</div>
-    </div>
-    <div class="feature">
-      <div class="feature-icon">▲</div>
-      <div class="feature-title">PHANTOM READER TOKEN</div>
-      <div class="feature-desc">Az olvasó kap egy tokent. Ő látja a valódi szöveget. Az AI sosem tudja futtatni a feloldót.</div>
-    </div>
-    <div class="feature">
-      <div class="feature-icon">◉</div>
-      <div class="feature-title">BOT DETEKTÁLÁS</div>
-      <div class="feature-desc">AI crawlerek automatikusan észlelve. Nekik más tartalom kerül kiszolgálásra.</div>
-    </div>
-    <div class="feature">
-      <div class="feature-icon">⌘</div>
-      <div class="feature-title">EMBED VÉDELEM</div>
-      <div class="feature-desc">Egy sor kód a weboldaladba – és az egész oldal védett. WordPress, Ghost, bármilyen CMS.</div>
-    </div>
-    <div class="feature">
-      <div class="feature-icon">∑</div>
-      <div class="feature-title">DASHBOARD</div>
-      <div class="feature-desc">Lásd valós időben ki próbálta feltörni, hányszor, honnan. Teljes kontroll.</div>
-    </div>
-  </div>
-</section>
+      // ── State ──
+      const state = {
+        phantom: null,
+        theme: localStorage.getItem('ph_theme') || 'warm-white',
+        color: localStorage.getItem('ph_color') || 'amber',
+        autoTheme: localStorage.getItem('ph_auto') === 'true',
+        currentSection: 'overview',
+        logFilter: 'all',
+        stats: {
+          protected: 0,
+          encrypted: 0,
+          dtDetections: 0,
+          keyboard: 0,
+          honeypot: 0,
+          rate: 0,
+        },
+        copyCleanup: null,
+      }
 
-<hr class="divider">
+      // ── DOM refs ──
+      const $ = (id) => document.getElementById(id)
+      const $$ = (sel) => document.querySelectorAll(sel)
 
-<!-- USE CASES -->
-<section>
-  <div class="section-label">▶ KINEK VALÓ</div>
-  <div class="section-title">MINDENKI SZÁMÁRA</div>
-  <div class="usecases">
-    <div class="usecase">
-      <div class="usecase-icon">✍️</div>
-      <div class="usecase-title">BLOGGEREK</div>
-      <div class="usecase-desc">A cikkeid csak embereknek szólnak. Az AI ne tanuljon belőlük.</div>
-    </div>
-    <div class="usecase">
-      <div class="usecase-icon">📰</div>
-      <div class="usecase-title">ÚJSÁGÍRÓK</div>
-      <div class="usecase-desc">Védett tartalom. Senki nem scrape-elheti a munkádat.</div>
-    </div>
-    <div class="usecase">
-      <div class="usecase-icon">🏢</div>
-      <div class="usecase-title">WEBOLDALTULAJOK</div>
-      <div class="usecase-desc">Egy sor kód – az egész oldalad védett minden AI botra.</div>
-    </div>
-    <div class="usecase">
-      <div class="usecase-icon">🔒</div>
-      <div class="usecase-title">MAGÁNEMBEREK</div>
-      <div class="usecase-desc">Amit a chatbe írsz – maradjon titkos. Az AI ne olvashassa.</div>
-    </div>
-    <div class="usecase">
-      <div class="usecase-icon">📚</div>
-      <div class="usecase-title">KIADÓK</div>
-      <div class="usecase-desc">Könyvek, cikkek, tartalmak – védve az AI tréning adatok ellen.</div>
-    </div>
-    <div class="usecase">
-      <div class="usecase-icon">💼</div>
-      <div class="usecase-title">VÁLLALATOK</div>
-      <div class="usecase-desc">Belső dokumentumok, stratégiák – AI-ok elől elzárva.</div>
-    </div>
-  </div>
-</section>
+      // ════════════════════════════════════════
+      // TOAST
+      // ════════════════════════════════════════
 
-<hr class="divider">
+      function toast(msg, icon = 'ℹ️', duration = 3000) {
+        const el = document.createElement('div')
+        el.className = 'toast'
+        el.innerHTML = `<span>${icon}</span><span>${msg}</span>`
+        $('toastContainer').appendChild(el)
+        setTimeout(() => {
+          el.classList.add('out')
+          el.addEventListener('animationend', () => el.remove())
+        }, duration)
+      }
 
-<!-- CTA -->
-<div class="cta-section">
-  <div class="cta-title">KEZDJ EL ÍRNI.<br>VÉDETTEM.</div>
-  <div class="cta-sub">INGYENES · AZONNALI · FELTÖRHETETLEN</div>
-  <div class="hero-buttons">
-    <a href="publisher/index.html" class="btn-primary">[ PHANTOM PUBLISHER ]</a>
- 
-  </div>
-</div>
+      // ════════════════════════════════════════
+      // TÉMA RENDSZER
+      // ════════════════════════════════════════
 
-<!-- FOOTER -->
-<footer>
-  <div class="footer-logo">⬡ PHANTOM</div>
-  <div class="footer-text">AI CANNOT READ YOU · 2026</div>
-  <div class="footer-text">
-    <a href="publisher/index.html" style="color:#333;text-decoration:none;margin-right:20px">PUBLISHER</a>
-    <a href="reader/index.html" style="color:#333;text-decoration:none;margin-right:20px">READER</a>
-    <a href="dashboard/index.html" style="color:#333;text-decoration:none">DASHBOARD</a>
-  </div>
-</footer>
+      const THEME_LABELS = {
+        'warm-white': 'Warm White',
+        'slate':      'Slate',
+        'dark':       'Dark',
+        'warm-dark':  'Warm Dark',
+      }
 
-<script src="../phantom-core.js"></script>
-<script>
-// Hero háttér zaj
-const bg = document.getElementById('hero-bg')
-let bgText = ''
-for (let i = 0; i < 2000; i++) {
-  bgText += PhantomCore.CHAOS_POOL[Math.floor(Math.random() * PhantomCore.CHAOS_POOL.length)]
-  if (i % 80 === 0) bgText += '\n'
-}
-bg.textContent = bgText + bgText
+      function applyTheme(theme, color) {
+        document.documentElement.setAttribute('data-theme', theme)
+        document.documentElement.setAttribute('data-color', color)
+        $('themeLabel').textContent = THEME_LABELS[theme] || theme
+        localStorage.setItem('ph_theme', theme)
+        localStorage.setItem('ph_color', color)
 
-// Live demo
-const humanText = 'A mesterséges intelligencia nem olvashatja ezt a szöveget.'
-function updateDemo() {
-  document.getElementById('demo-ai').textContent = PhantomCore.encode(humanText)
-}
-updateDemo()
-setInterval(updateDemo, 1500)
+        // Checkmark frissítés
+        $$('.theme-option').forEach(o => o.classList.toggle('selected', o.dataset.theme === theme))
+        $$('.color-dot').forEach(d => d.classList.toggle('selected', d.dataset.color === color))
+      }
 
-// Statisztikák
-const articles = Object.keys(PhantomCore.getArticles()).length
-const events = PhantomCore.getEvents().filter(e => e.type === 'attack').length
-document.getElementById('stat-articles').textContent = articles
-document.getElementById('stat-attacks').textContent = events
+      function initTheme() {
+        if (state.autoTheme) {
+          const dark = window.matchMedia('(prefers-color-scheme: dark)').matches
+          state.theme = dark ? 'dark' : 'warm-white'
+        }
+        applyTheme(state.theme, state.color)
+        $('autoTheme').checked = state.autoTheme
 
-PhantomCore.logEvent('landing_visit')
-</script>
+        // System theme watcher
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+          if (state.autoTheme) {
+            state.theme = e.matches ? 'dark' : 'warm-white'
+            applyTheme(state.theme, state.color)
+          }
+        })
+      }
+
+      function bindThemePanel() {
+        const trigger = $('themeTrigger')
+        const panel = $('themePanel')
+
+        trigger.addEventListener('click', (e) => {
+          e.stopPropagation()
+          panel.classList.toggle('open')
+        })
+
+        document.addEventListener('click', (e) => {
+          if (!panel.contains(e.target) && e.target !== trigger) {
+            panel.classList.remove('open')
+          }
+        })
+
+        $$('.theme-option').forEach(opt => {
+          opt.addEventListener('click', () => {
+            state.theme = opt.dataset.theme
+            state.autoTheme = false
+            $('autoTheme').checked = false
+            localStorage.setItem('ph_auto', 'false')
+            applyTheme(state.theme, state.color)
+          })
+        })
+
+        $$('.color-dot').forEach(dot => {
+          dot.addEventListener('click', () => {
+            state.color = dot.dataset.color
+            applyTheme(state.theme, state.color)
+          })
+        })
+
+        $('autoTheme').addEventListener('change', (e) => {
+          state.autoTheme = e.target.checked
+          localStorage.setItem('ph_auto', state.autoTheme)
+          if (state.autoTheme) {
+            const dark = window.matchMedia('(prefers-color-scheme: dark)').matches
+            state.theme = dark ? 'dark' : 'warm-white'
+            applyTheme(state.theme, state.color)
+          }
+        })
+      }
+
+      // ════════════════════════════════════════
+      // NAVIGÁCIÓ
+      // ════════════════════════════════════════
+
+      function bindNav() {
+        $$('.nav-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const section = btn.dataset.section
+            $$('.nav-btn').forEach(b => b.classList.remove('active'))
+            btn.classList.add('active')
+            $$('.section').forEach(s => s.classList.remove('active'))
+            document.getElementById(`sec-${section}`).classList.add('active')
+            state.currentSection = section
+            if (section === 'eventlog') renderLog()
+          })
+        })
+      }
+
+      // ════════════════════════════════════════
+      // STATUS BAR
+      // ════════════════════════════════════════
+
+      function setStatus(label, type = 'active') {
+        $('statusLabel').textContent = label
+        const dot = $('statusDot')
+        dot.className = 'status-dot ' + type
+      }
+
+      // ════════════════════════════════════════
+      // STATS FRISSÍTÉS
+      // ════════════════════════════════════════
+
+      function refreshStats() {
+        if (!state.phantom) return
+
+        // Log alapú stats
+        const logs = state.phantom.eventLog
+        let keyboard = 0, honeypot = 0, dt = 0, rate = 0
+
+        logs.forEach(e => {
+          if (e.type === 'keyboard_devtools_attempt') keyboard++
+          if (e.type.startsWith('honeypot')) honeypot++
+          if (e.type.startsWith('devtools')) dt++
+          if (e.type === 'rate_limited') rate++
+        })
+
+        state.stats.keyboard = keyboard
+        state.stats.honeypot = honeypot
+        state.stats.dtDetections = dt
+        state.stats.rate = rate
+
+        // DOM update
+        $('statProtected').textContent = state.stats.protected
+        $('statEncrypted').textContent = state.stats.encrypted
+        $('statLogs').textContent = logs.length
+        $('statDevTools').textContent = state.phantom.isDevToolsOpen ? '⚠️ Nyitva' : '✅ Zárva'
+        $('statDevToolsSub').textContent = state.phantom.isDevToolsOpen ? 'detektálva' : 'nem detektálva'
+
+        // Rate limiter status
+        const rs = state.phantom.rateLimiterStatus('protect')
+        if (rs) {
+          $('statRate').textContent = `${rs.remaining}/${15}`
+          updateGauge(rs)
+        }
+
+        // Bar stats
+        const maxBar = Math.max(keyboard + honeypot + dt + rate, 1)
+        $('barKeyboard').style.width = (keyboard / maxBar * 100) + '%'
+        $('numKeyboard').textContent = keyboard
+        $('barHoneypot').style.width = (honeypot / maxBar * 100) + '%'
+        $('numHoneypot').textContent = honeypot
+        $('barDevtools').style.width = (dt / maxBar * 100) + '%'
+        $('numDevtools').textContent = dt
+        $('barRate').style.width = (rate / maxBar * 100) + '%'
+        $('numRate').textContent = rate
+
+        // DevTools panel
+        const wDiff = window.outerWidth - window.innerWidth
+        const hDiff = window.outerHeight - window.innerHeight
+        $('dtWidth').textContent = `${wDiff}px`
+        $('dtHeight').textContent = `${hDiff}px`
+        $('dtStatus').textContent = state.phantom.isDevToolsOpen ? '⚠️ Detektálva' : '✅ Nem nyitva'
+        $('dtCount').textContent = dt
+
+        // Footer idő
+        $('footerTime').textContent = new Date().toLocaleTimeString('hu-HU')
+      }
+
+      function updateGauge(rs) {
+        const pct = ((15 - rs.remaining) / 15) * 100
+        const fill = $('gaugeFill')
+        fill.style.width = pct + '%'
+        fill.className = 'gauge-fill' + (pct > 80 ? ' danger' : pct > 60 ? ' warn' : '')
+        $('gaugeLabel').textContent = `${15 - rs.remaining} / 15`
+        $('gaugeReset').textContent = rs.resetsIn > 0
+          ? `${Math.ceil(rs.resetsIn / 1000)}s`
+          : '—'
+      }
+
+      // ════════════════════════════════════════
+      // SZÖVEGVÉDELEM
+      // ════════════════════════════════════════
+
+      function bindProtection() {
+        // Quick protect
+        const levelSlider = $('quickLevel')
+        const levelVal = $('quickLevelVal')
+
+        levelSlider.addEventListener('input', () => {
+          levelVal.textContent = levelSlider.value
+          $('quickLevelLabel').textContent = levelSlider.value
+        })
+
+        $('quickProtectBtn').addEventListener('click', () => {
+          const text = $('quickInput').value.trim()
+          if (!text) { toast('Írj be szöveget!', '⚠️'); return }
+          if (!state.phantom) { toast('Engine nem inicializálva', '❌'); return }
+
+          const result = state.phantom.protect(text, parseInt(levelSlider.value))
+          state.stats.protected++
+
+          const out = $('quickOutput')
+          out.textContent = result
+          out.classList.add('has-content')
+          refreshStats()
+          toast('Szöveg sikeresen védve', '🛡')
+        })
+
+        // Detail protect
+        const invSlider = $('invDensity')
+        const homSlider = $('homRate')
+
+        invSlider.addEventListener('input', () => {
+          const v = (invSlider.value / 100).toFixed(2)
+          $('invVal').textContent = v
+          $('invLabel').textContent = v
+        })
+
+        homSlider.addEventListener('input', () => {
+          const v = (homSlider.value / 100).toFixed(2)
+          $('homVal').textContent = v
+          $('homLabel').textContent = v
+        })
+
+        $('analyzeBtn').addEventListener('click', () => {
+          const text = $('protectInput').value.trim()
+          if (!text) { toast('Írj be szöveget!', '⚠️'); return }
+          if (!state.phantom) return
+
+          const invD = invSlider.value / 100
+          const homR = homSlider.value / 100
+
+          // Manuálisan alkalmazzuk, hogy mérni tudjuk
+          // (a protect() adaptív szintet vár, itt direkt arányt adunk)
+          const level = Math.round(invD * 5 + homR * 5) / 2
+          const result = state.phantom.protect(text, Math.max(1, Math.min(5, Math.round(level))))
+          state.stats.protected++
+
+          const out = $('protectOutput')
+          out.textContent = result
+          out.classList.add('has-content')
+
+          // Analízis
+          const INVISIBLE = ['\u200B','\u200C','\u200D','\uFEFF','\u2060']
+          const HGLYPHS = new Set(['а','е','о','р','с','х','і','А','Е','О'])
+
+          let invCount = 0, homCount = 0
+          for (const ch of result) {
+            if (INVISIBLE.includes(ch)) invCount++
+            if (HGLYPHS.has(ch)) homCount++
+          }
+
+          $('origLen').textContent = text.length
+          $('protLen').textContent = result.length
+          $('invCount').textContent = invCount
+          $('homCount').textContent = homCount
+
+          const maxLen = result.length || 1
+          $('protBar').style.width = Math.min(100, result.length / maxLen * 100) + '%'
+          $('invBar').style.width = Math.min(100, invCount / maxLen * 100 * 5) + '%'
+          $('homBar').style.width = Math.min(100, homCount / maxLen * 100 * 5) + '%'
+
+          refreshStats()
+          toast('Elemzés kész', '🔬')
+        })
+
+        // Copy protection teszt
+        if (state.copyCleanup) state.copyCleanup()
+        state.copyCleanup = state.phantom
+          ? state.phantom.protectElement($('copyProtectedArea'))
+          : () => {}
+      }
+
+      // ════════════════════════════════════════
+      // TITKOSÍTÁS
+      // ════════════════════════════════════════
+
+      function bindEncryption() {
+        // Tabs
+        $$('.enc-tab').forEach(tab => {
+          tab.addEventListener('click', () => {
+            $$('.enc-tab').forEach(t => t.classList.remove('active'))
+            $$('.enc-tab-content').forEach(c => c.classList.remove('active'))
+            tab.classList.add('active')
+            $(`tab-${tab.dataset.tab}`).classList.add('active')
+          })
+        })
+
+        // Encrypt
+        $('encBtn').addEventListener('click', async () => {
+          const text = $('encInput').value.trim()
+          if (!text) { toast('Írj be szöveget!', '⚠️'); return }
+          if (!state.phantom) return
+
+          const result = await state.phantom.encryptContent(text)
+          if (!result) {
+            toast('Titkosítás sikertelen — Web Crypto nem elérhető?', '❌')
+            return
+          }
+
+          state.stats.encrypted++
+          const out = $('encOutput')
+          out.textContent = result
+          out.classList.add('has-content')
+          $('encCopyBtn').style.display = 'block'
+          refreshStats()
+          toast('Titkosítva (AES-256-GCM)', '🔒')
+        })
+
+        $('encCopyBtn').addEventListener('click', () => {
+          const text = $('encOutput').textContent
+          navigator.clipboard.writeText(text).then(() => toast('Vágólapra másolva', '📋'))
+        })
+
+        // Decrypt
+        $('decBtn').addEventListener('click', async () => {
+          const cipher = $('decInput').value.trim()
+          if (!cipher) { toast('Írj be titkosított szöveget!', '⚠️'); return }
+          if (!state.phantom) return
+
+          const result = await state.phantom.decryptContent(cipher)
+          const out = $('decOutput')
+          if (!result) {
+            out.textContent = '❌ Visszafejtés sikertelen — helytelen kulcs vagy sérült adat (GCM auth tag mismatch)'
+            out.classList.add('has-content')
+            toast('Visszafejtés sikertelen', '❌')
+            return
+          }
+
+          out.textContent = result
+          out.classList.add('has-content')
+          toast('Visszafejtve', '🔓')
+        })
+
+        // Key display
+        refreshKeyDisplay()
+
+        // Regen
+        $('regenKeyBtn').addEventListener('click', async () => {
+          localStorage.removeItem('phantom_key_v3')
+          toast('Kulcs törölve — újrainicializálás…', '🔑')
+          await reinitPhantom()
+          refreshKeyDisplay()
+        })
+
+        $('clearKeyBtn').addEventListener('click', () => {
+          localStorage.removeItem('phantom_key_v3')
+          refreshKeyDisplay()
+          toast('Kulcs törölve a localStorage-ból', '🗑')
+        })
+      }
+
+      function refreshKeyDisplay() {
+        const stored = localStorage.getItem('phantom_key_v3')
+        const display = $('keyDisplay')
+        const status = $('keyStatus')
+        if (stored) {
+          display.textContent = stored
+          display.classList.add('has-content')
+          status.textContent = '✅ Betöltve'
+          status.style.color = '#22c55e'
+        } else {
+          display.innerHTML = '<span class="output-placeholder">Nincs tárolt kulcs</span>'
+          display.classList.remove('has-content')
+          status.textContent = '⚠️ Hiányzik'
+          status.style.color = '#f59e0b'
+        }
+      }
+
+      // ════════════════════════════════════════
+      // EVENT LOG
+      // ════════════════════════════════════════
+
+      const LOG_CONFIG = {
+        phantom_init:               { dot: 'dot-success', label: 'Init' },
+        phantom_destroyed:          { dot: 'dot-warn',    label: 'Destroy' },
+        keyboard_devtools_attempt:  { dot: 'dot-danger',  label: 'Keyboard' },
+        devtools_opened:            { dot: 'dot-warn',    label: 'DevTools' },
+        devtools_closed:            { dot: 'dot-info',    label: 'DevTools' },
+        honeypot_focus:             { dot: 'dot-danger',  label: 'Honeypot' },
+        honeypot_filled:            { dot: 'dot-danger',  label: 'Honeypot' },
+        encrypt_error:              { dot: 'dot-danger',  label: 'Encrypt' },
+        decrypt_error:              { dot: 'dot-danger',  label: 'Encrypt' },
+        rate_limited:               { dot: 'dot-warn',    label: 'Rate' },
+        init_warning:               { dot: 'dot-warn',    label: 'Init' },
+        key_init_failed:            { dot: 'dot-danger',  label: 'Init' },
+      }
+
+      const FILTER_MAP = {
+        all:      () => true,
+        init:     e => e.type.includes('init') || e.type.includes('destroy'),
+        keyboard: e => e.type.includes('keyboard'),
+        devtools: e => e.type.includes('devtools'),
+        encrypt:  e => e.type.includes('encrypt') || e.type.includes('decrypt'),
+        rate:     e => e.type.includes('rate'),
+      }
+
+      function renderLog() {
+        if (!state.phantom) return
+        const entries = [...state.phantom.eventLog].reverse()
+        const filter = FILTER_MAP[state.logFilter] || FILTER_MAP.all
+        const filtered = entries.filter(filter)
+
+        const list = $('logList')
+        if (filtered.length === 0) {
+          list.innerHTML = '<div class="log-empty">Nincs megjeleníthető bejegyzés.</div>'
+          return
+        }
+
+        list.innerHTML = filtered.map((entry, i) => {
+          const cfg = LOG_CONFIG[entry.type] || { dot: 'dot-info', label: 'Event' }
+          const time = new Date(entry.ts).toLocaleTimeString('hu-HU')
+          const metaStr = Object.keys(entry.data).length
+            ? Object.entries(entry.data).map(([k,v]) => `${k}: ${v}`).join(' · ')
+            : '—'
+
+          return `
+            <div class="log-entry" data-idx="${i}" style="cursor:pointer">
+              <div class="log-type-dot ${cfg.dot}"></div>
+              <div>
+                <div class="log-type">${entry.type}</div>
+                <div class="log-meta">${metaStr}</div>
+              </div>
+              <div class="log-time">${time}</div>
+            </div>
+          `
+        }).join('')
+
+        // Click → modal
+        list.querySelectorAll('.log-entry').forEach((el, i) => {
+          el.addEventListener('click', () => openLogModal(filtered[i]))
+        })
+      }
+
+      function openLogModal(entry) {
+        $('modalTitle').textContent = `Esemény: ${entry.type}`
+        $('modalBody').textContent = JSON.stringify({
+          type: entry.type,
+          timestamp: new Date(entry.ts).toISOString(),
+          data: entry.data,
+        }, null, 2)
+        $('modalOverlay').classList.add('open')
+      }
+
+      function bindLog() {
+        $$('.filter-chip').forEach(chip => {
+          chip.addEventListener('click', () => {
+            $$('.filter-chip').forEach(c => c.classList.remove('active'))
+            chip.classList.add('active')
+            state.logFilter = chip.dataset.filter
+            renderLog()
+          })
+        })
+
+        $('refreshLogBtn').addEventListener('click', () => {
+          renderLog()
+          refreshStats()
+          toast('Log frissítve', '↺')
+        })
+
+        $('clearLogBtn').addEventListener('click', () => {
+          if (!state.phantom) return
+          state.phantom.clearLog()
+          renderLog()
+          refreshStats()
+          toast('Log törölve', '🗑')
+        })
+
+        $('modalClose').addEventListener('click', () => {
+          $('modalOverlay').classList.remove('open')
+        })
+
+        $('modalOverlay').addEventListener('click', (e) => {
+          if (e.target === $('modalOverlay')) $('modalOverlay').classList.remove('open')
+        })
+      }
+
+      // ════════════════════════════════════════
+      // PHANTOM INIT / REINIT
+      // ════════════════════════════════════════
+
+      async function reinitPhantom() {
+        if (state.phantom) {
+          state.phantom.destroy()
+          state.phantom = null
+        }
+
+        setStatus('Inicializálás…', '')
+
+        try {
+          state.phantom = PhantomCore.create({
+            defaultProtectionLevel: 4,
+            rateLimitMax: 15,
+            rateLimitWindow: 30_000,
+            logMaxEntries: 200,
+            devToolsInterval: 2000,
+          })
+
+          await state.phantom.init()
+
+          // Copy protection újrakötés
+          const el = $('copyProtectedArea')
+          if (el && state.copyCleanup) state.copyCleanup()
+          if (el) state.copyCleanup = state.phantom.protectElement(el)
+
+          setStatus('Aktív', 'active')
+          refreshKeyDisplay()
+          refreshStats()
+          toast('Phantom Core v3.0 aktív', '🛡')
+
+        } catch (err) {
+          setStatus('Hiba', 'warning')
+          toast(`Init hiba: ${err.message}`, '❌')
+          console.error('[PhantomDashboard] init error:', err)
+        }
+      }
+
+      // ════════════════════════════════════════
+      // BOOT
+      // ════════════════════════════════════════
+
+      async function boot() {
+        initTheme()
+        bindThemePanel()
+        bindNav()
+        bindLog()
+
+        await reinitPhantom()
+
+        bindProtection()
+        bindEncryption()
+
+        // Auto frissítés
+        setInterval(() => {
+          refreshStats()
+          if (state.currentSection === 'eventlog') renderLog()
+        }, 2000)
+
+        // SPA cleanup
+        window.addEventListener('beforeunload', () => {
+          if (state.phantom) state.phantom.destroy()
+        })
+      }
+
+      return { boot }
+    })()
+
+    // ── Start ──
+    document.addEventListener('DOMContentLoaded', () => Dashboard.boot())
+  </script>
 </body>
 </html>
