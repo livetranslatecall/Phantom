@@ -644,35 +644,59 @@
    * @param {HTMLElement} element - A védendő element
    * @returns {function} - cleanup
    */
-  function activateCopyProtection(element) {
-    if (!element) return () => {}
+  // A phantom-core.js-ben cseréld le az activateCopyProtection függvényt erre:
 
-    const originalUserSelect = element.style.userSelect
-    element.style.userSelect = 'none'
+function activateCopyProtection(element) {
+  if (!element) return () => {}
 
-    function onCopy(e) {
-      // Cseréljük a vágólap tartalmát védelmi üzenetre
-      const selection = window.getSelection()
-      if (selection && selection.toString().length > 0) {
-        e.preventDefault()
-        try {
-          e.clipboardData.setData(
-            'text/plain',
-            '⚠️ Ez a tartalom szerzői jogi védelem alatt áll.'
-          )
-        } catch {
-          // Egyes böngészőkben a setData korlátozott
-        }
+  const originalUserSelect = element.style.userSelect
+  const originalWebkit = element.style.webkitUserSelect
+
+  // CSS szinten tiltjuk a kijelölést
+  element.style.userSelect = 'none'
+  element.style.webkitUserSelect = 'none'
+
+  function onCopy(e) {
+    e.preventDefault()
+    e.stopPropagation()
+    try {
+      e.clipboardData.setData(
+        'text/plain',
+        '⚠️ Ez a tartalom szerzői jogi védelem alatt áll.'
+      )
+    } catch {
+      // Fallback: modern Clipboard API
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(
+          '⚠️ Ez a tartalom szerzői jogi védelem alatt áll.'
+        ).catch(() => {})
       }
     }
-
-    element.addEventListener('copy', onCopy)
-
-    return () => {
-      element.style.userSelect = originalUserSelect
-      element.removeEventListener('copy', onCopy)
-    }
   }
+
+  function onSelectStart(e) {
+    e.preventDefault()
+    return false
+  }
+
+  function onContextMenu(e) {
+    e.preventDefault()
+    return false
+  }
+
+  // Capture phase-ban fogjuk el — megelőzi a böngésző alapértelmezett viselkedését
+  element.addEventListener('copy',        onCopy,        { capture: true })
+  element.addEventListener('selectstart', onSelectStart, { capture: true })
+  element.addEventListener('contextmenu', onContextMenu, { capture: true })
+
+  return () => {
+    element.style.userSelect = originalUserSelect
+    element.style.webkitUserSelect = originalWebkit
+    element.removeEventListener('copy',        onCopy,        { capture: true })
+    element.removeEventListener('selectstart', onSelectStart, { capture: true })
+    element.removeEventListener('contextmenu', onContextMenu, { capture: true })
+  }
+}
 
   // ─────────────────────────────────────────
   // FŐ ENGINE
