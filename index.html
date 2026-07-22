@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phantom – AI Cannot Read You</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --green: #00ff88;
+  --red: #ff3333;
+  --dark: #0a0a0a;
+  --panel: #0f0f0f;
+  --border: #1a1a1a;
+  --green-dim: #003322;
+  --text: #aaaaaa;
+}
+
+body {
+  background: var(--dark);
+  color: var(--text);
+  font-family: 'Courier New', monospace;
+  overflow-x: hidden;
+}
+
+/* NAV */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: rgba(10,10,10,0.95);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-logo {
+  color: var(--green);
+  font-size: 1em;
+  letter-spacing: 6px;
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex;
+  gap: 30px;
+  list-style: none;
+}
+
+.nav-links a {
+  color: #444;
+  text-decoration: none;
+  font-size: 0.65em;
+  letter-spacing: 3px;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--green); }
+
+/* HERO */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 100px 20px 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0.03;
+  font-size: 0.7em;
+  line-height: 1.4;
+  word-break: break-all;
+  color: var(--green);
+  pointer-events: none;
+  animation: bgscroll 8s linear infinite;
+}
+
+@keyframes bgscroll {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+
+.hero-badge {
+  display: inline-block;
+  border: 1px solid var(--green-dim);
+  color: var(--green);
+  font-size: 0.6em;
+  letter-spacing: 4px;
+  padding: 6px 16px;
+  margin-bottom: 30px;
+  background: rgba(0,255,136,0.03);
+}
+
+.hero h1 {
+  font-size: clamp(2em, 6vw, 4.5em);
+  color: #ffffff;
+  letter-spacing: 4px;
+  line-height: 1.2;
+  margin-bottom: 20px;
+  font-family: 'Courier New', monospace;
+}
+
+.hero h1 span { color: var(--green); }
+
+.hero-sub {
+  font-size: 0.8em;
+  letter-spacing: 3px;
+  color: #444;
+  margin-bottom: 50px;
+  max-width: 600px;
+  line-height: 1.8;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 80px;
+}
+
+.btn-primary {
+  background: var(--green);
+  color: #000;
+  border: none;
+  font-family: 'Courier New', monospace;
+  font-size: 0.7em;
+  letter-spacing: 4px;
+  padding: 14px 28px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover { background: #00cc6a; }
+
+.btn-secondary {
+  background: transparent;
+  color: var(--green);
+  border: 1px solid var(--green-dim);
+  font-family: 'Courier New', monospace;
+  font-size: 0.7em;
+  letter-spacing: 4px;
+  padding: 14px 28px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover { background: var(--green-dim); }
+
+/* LIVE DEMO */
+.live-demo {
+  display: flex;
+  gap: 20px;
+  max-width: 800px;
+  width: 100%;
+}
+
+.demo-panel {
+  flex: 1;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 20px;
+}
+
+.demo-label {
+  font-size: 0.55em;
+  letter-spacing: 3px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.demo-human .demo-label { color: var(--green); }
+.demo-ai .demo-label { color: var(--red); }
+
+.demo-text {
+  font-size: 0.75em;
+  line-height: 1.8;
+  min-height: 80px;
+}
+
+.demo-human .demo-text { color: var(--green); font-family: Georgia, serif; }
+.demo-ai .demo-text { color: var(--red); word-break: break-all; }
+
+/* STATS */
+.stats {
+  display: flex;
+  gap: 40px;
+  margin-top: 60px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 2.5em;
+  color: var(--green);
+  display: block;
+}
+
+.stat-label {
+  font-size: 0.55em;
+  letter-spacing: 3px;
+  color: #333;
+  margin-top: 4px;
+}
+
+/* SECTIONS */
+section {
+  padding: 80px 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.section-label {
+  font-size: 0.6em;
+  letter-spacing: 4px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.section-title {
+  font-size: clamp(1.2em, 3vw, 2em);
+  color: #ffffff;
+  letter-spacing: 3px;
+  margin-bottom: 40px;
+}
+
+/* HOW IT WORKS */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.step {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 24px;
+}
+
+.step-num {
+  font-size: 2em;
+  color: var(--green-dim);
+  margin-bottom: 12px;
+}
+
+.step-title {
+  color: #ffffff;
+  font-size: 0.8em;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.step-desc {
+  font-size: 0.65em;
+  letter-spacing: 1px;
+  color: #444;
+  line-height: 1.7;
+}
+
+/* FEATURES */
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.feature {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 24px;
+  transition: border-color 0.2s;
+}
+
+.feature:hover { border-color: var(--green-dim); }
+
+.feature-icon {
+  font-size: 1.5em;
+  margin-bottom: 12px;
+}
+
+.feature-title {
+  color: #ffffff;
+  font-size: 0.75em;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.feature-desc {
+  font-size: 0.62em;
+  letter-spacing: 1px;
+  color: #444;
+  line-height: 1.8;
+}
+
+/* USE CASES */
+.usecases {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.usecase {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 20px;
+  text-align: center;
+}
+
+.usecase-icon { font-size: 2em; margin-bottom: 10px; }
+
+.usecase-title {
+  color: #ffffff;
+  font-size: 0.7em;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+
+.usecase-desc {
+  font-size: 0.6em;
+  color: #444;
+  letter-spacing: 1px;
+  line-height: 1.6;
+}
+
+/* CTA */
+.cta-section {
+  text-align: center;
+  padding: 80px 20px;
+  border-top: 1px solid var(--border);
+}
+
+.cta-title {
+  font-size: clamp(1.5em, 4vw, 3em);
+  color: #ffffff;
+  letter-spacing: 4px;
+  margin-bottom: 16px;
+}
+
+.cta-sub {
+  font-size: 0.7em;
+  letter-spacing: 2px;
+  color: #444;
+  margin-bottom: 40px;
+}
+
+/* FOOTER */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 30px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.footer-logo { color: var(--green); letter-spacing: 4px; font-size: 0.8em; }
+.footer-text { color: #222; font-size: 0.55em; letter-spacing: 2px; }
+
+/* DIVIDER */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0;
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="index.html">⬡ PHANTOM</a>
+  <ul class="nav-links">
+    <li><a href="publisher/index.html">PUBLISHER</a></li>
+    <li><a href="reader/index.html">READER</a></li>
+    <li><a href="dashboard/index.html">DASHBOARD</a></li>
+    <li><a href="extension/popup.html">EXTENSION</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg" id="hero-bg"></div>
+
+  <div class="hero-badge">⬡ PHANTOM v1.0 · AI PROTECTION SYSTEM</div>
+
+  <h1>AZ AI NEM<br>LÁTHATJA<br><span>A SZAVAID</span></h1>
+
+  <p class="hero-sub">
+    Írd meg a cikkedet, blogodat, gondolataidat.<br>
+    Az emberek olvassák. Az AI-ok soha.
+  </p>
+
+  <div class="hero-buttons">
+    <a href="publisher/index.html" class="btn-primary">[ ÍRJ MOST ]</a>
+    <a href="dashboard/index.html" class="btn-secondary">[ DASHBOARD ]</a>
+  </div>
+
+  <!-- LIVE DEMO -->
+  <div class="live-demo">
+    <div class="demo-panel demo-human">
+      <div class="demo-label">▶ EMBER LÁTJA</div>
+      <div class="demo-text" id="demo-human">A mesterséges intelligencia nem olvashatja ezt a szöveget.</div>
+    </div>
+    <div class="demo-panel demo-ai">
+      <div class="demo-label">▶ AI LÁTJA</div>
+      <div class="demo-text" id="demo-ai"></div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <span class="stat-number" id="stat-articles">0</span>
+      <span class="stat-label">VÉDETT CIKK</span>
+    </div>
+    <div class="stat">
+      <span class="stat-number" id="stat-attacks">0</span>
+      <span class="stat-label">BLOKOLT TÁMADÁS</span>
+    </div>
+    <div class="stat">
+      <span class="stat-number">∞</span>
+      <span class="stat-label">AI PLATFORM VÉDVE</span>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- HOW IT WORKS -->
+<section>
+  <div class="section-label">▶ HOGYAN MŰKÖDIK</div>
+  <div class="section-title">3 LÉPÉS. TELJES VÉDELEM.</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-title">ÍRSZ</div>
+      <div class="step-desc">Megírod a cikkedet a Phantom Publisherben. Normálisan, ahogy szoktad.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-title">PHANTOM VÉDI</div>
+      <div class="step-desc">A rendszer automatikusan két réteget hoz létre. Ember látja az igazit. AI csak zajt lát.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-title">ÖRÖKKÉ MOZOG</div>
+      <div class="step-desc">A phantom réteg folyamatosan változik. Ha valaki feltörni próbálja – dupla zaj aktiválódik.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-title">TE LÁTOD KI PRÓBÁLTA</div>
+      <div class="step-desc">A Dashboard megmutatja minden feltörési kísérletet. Valós időben.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- FEATURES -->
+<section>
+  <div class="section-label">▶ VÉDELMI RÉTEGEK</div>
+  <div class="section-title">FELTÖRHETETLEN RENDSZER</div>
+  <div class="features">
+    <div class="feature">
+      <div class="feature-icon">⬡</div>
+      <div class="feature-title">PHANTOM CHAT</div>
+      <div class="feature-desc">Chrome Extension. Amit beírsz Claude-nak, ChatGPT-nek, Gemini-nek – az AI soha nem látja tisztán.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">◈</div>
+      <div class="feature-title">PHANTOM PUBLISHER</div>
+      <div class="feature-desc">Írd meg a cikkedet nálunk. Automatikusan védett lesz minden AI crawler ellen.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">⊛</div>
+      <div class="feature-title">CLIPBOARD VÉDELEM</div>
+      <div class="feature-desc">Ha valaki kimásolja a cikkedet – phantom szöveget kap. Hiába illeszti be az AI-nak.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">∿</div>
+      <div class="feature-title">FOLYAMATOS MOZGÁS</div>
+      <div class="feature-desc">A phantom réteg soha nem áll meg. Ha valaki megpróbálja megfigyelni – mindig mást lát.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">⍟</div>
+      <div class="feature-title">TÁMADÁSVÉDELEM</div>
+      <div class="feature-desc">Feltörési kísérlet esetén automatikusan dupla zaj, dupla sebesség aktiválódik.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">▲</div>
+      <div class="feature-title">PHANTOM READER TOKEN</div>
+      <div class="feature-desc">Az olvasó kap egy tokent. Ő látja a valódi szöveget. Az AI sosem tudja futtatni a feloldót.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">◉</div>
+      <div class="feature-title">BOT DETEKTÁLÁS</div>
+      <div class="feature-desc">AI crawlerek automatikusan észlelve. Nekik más tartalom kerül kiszolgálásra.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">⌘</div>
+      <div class="feature-title">EMBED VÉDELEM</div>
+      <div class="feature-desc">Egy sor kód a weboldaladba – és az egész oldal védett. WordPress, Ghost, bármilyen CMS.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">∑</div>
+      <div class="feature-title">DASHBOARD</div>
+      <div class="feature-desc">Lásd valós időben ki próbálta feltörni, hányszor, honnan. Teljes kontroll.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- USE CASES -->
+<section>
+  <div class="section-label">▶ KINEK VALÓ</div>
+  <div class="section-title">MINDENKI SZÁMÁRA</div>
+  <div class="usecases">
+    <div class="usecase">
+      <div class="usecase-icon">✍️</div>
+      <div class="usecase-title">BLOGGEREK</div>
+      <div class="usecase-desc">A cikkeid csak embereknek szólnak. Az AI ne tanuljon belőlük.</div>
+    </div>
+    <div class="usecase">
+      <div class="usecase-icon">📰</div>
+      <div class="usecase-title">ÚJSÁGÍRÓK</div>
+      <div class="usecase-desc">Védett tartalom. Senki nem scrape-elheti a munkádat.</div>
+    </div>
+    <div class="usecase">
+      <div class="usecase-icon">🏢</div>
+      <div class="usecase-title">WEBOLDALTULAJOK</div>
+      <div class="usecase-desc">Egy sor kód – az egész oldalad védett minden AI botra.</div>
+    </div>
+    <div class="usecase">
+      <div class="usecase-icon">🔒</div>
+      <div class="usecase-title">MAGÁNEMBEREK</div>
+      <div class="usecase-desc">Amit a chatbe írsz – maradjon titkos. Az AI ne olvashassa.</div>
+    </div>
+    <div class="usecase">
+      <div class="usecase-icon">📚</div>
+      <div class="usecase-title">KIADÓK</div>
+      <div class="usecase-desc">Könyvek, cikkek, tartalmak – védve az AI tréning adatok ellen.</div>
+    </div>
+    <div class="usecase">
+      <div class="usecase-icon">💼</div>
+      <div class="usecase-title">VÁLLALATOK</div>
+      <div class="usecase-desc">Belső dokumentumok, stratégiák – AI-ok elől elzárva.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- CTA -->
+<div class="cta-section">
+  <div class="cta-title">KEZDJ EL ÍRNI.<br>VÉDETTEM.</div>
+  <div class="cta-sub">INGYENES · AZONNALI · FELTÖRHETETLEN</div>
+  <div class="hero-buttons">
+    <a href="publisher/index.html" class="btn-primary">[ PHANTOM PUBLISHER ]</a>
+    <a href="extension/popup.html" class="btn-secondary">[ CHROME EXTENSION ]</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">⬡ PHANTOM</div>
+  <div class="footer-text">AI CANNOT READ YOU · 2026</div>
+  <div class="footer-text">
+    <a href="publisher/index.html" style="color:#333;text-decoration:none;margin-right:20px">PUBLISHER</a>
+    <a href="reader/index.html" style="color:#333;text-decoration:none;margin-right:20px">READER</a>
+    <a href="dashboard/index.html" style="color:#333;text-decoration:none">DASHBOARD</a>
+  </div>
+</footer>
+
+<script src="../phantom-core.js"></script>
+<script>
+// Hero háttér zaj
+const bg = document.getElementById('hero-bg')
+let bgText = ''
+for (let i = 0; i < 2000; i++) {
+  bgText += PhantomCore.CHAOS_POOL[Math.floor(Math.random() * PhantomCore.CHAOS_POOL.length)]
+  if (i % 80 === 0) bgText += '\n'
+}
+bg.textContent = bgText + bgText
+
+// Live demo
+const humanText = 'A mesterséges intelligencia nem olvashatja ezt a szöveget.'
+function updateDemo() {
+  document.getElementById('demo-ai').textContent = PhantomCore.encode(humanText)
+}
+updateDemo()
+setInterval(updateDemo, 1500)
+
+// Statisztikák
+const articles = Object.keys(PhantomCore.getArticles()).length
+const events = PhantomCore.getEvents().filter(e => e.type === 'attack').length
+document.getElementById('stat-articles').textContent = articles
+document.getElementById('stat-attacks').textContent = events
+
+PhantomCore.logEvent('landing_visit')
+</script>
+</body>
+</html>
